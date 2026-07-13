@@ -16,7 +16,7 @@ using Microsoft.Win32;
 
 namespace AstryxTweaks;
 
-public class MainForm : Form
+public partial class MainForm : Form
 {
 	private sealed class MaximumStep
 	{
@@ -324,7 +324,8 @@ public class MainForm : Form
 		//IL_0b36: Expected O, but got Unknown
 		//IL_0c98: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0ca2: Expected O, but got Unknown
-		((Control)this).Text = "Astryx Maximum Tweaks Edition";
+		LoadUserPreferences();
+		((Control)this).Text = "Astryx Tweaks Maximum Tweaks Edition";
 		try
 		{
 			Icon val = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
@@ -508,7 +509,7 @@ public class MainForm : Form
 		{
 			ShowGroup("Privacy");
 		});
-		BuildSidebarUserCard();
+		BuildSidebarUtilities();
 		contentArea = new Panel();
 		((Control)contentArea).Dock = (DockStyle)5;
 		((Control)contentArea).BackColor = BG;
@@ -571,6 +572,7 @@ public class MainForm : Form
 		BuildBackups();
 		BuildDefenderPage();
 		BuildPowerPage();
+		BuildUtilityPages();
 		foreach (Panel orderedPage in orderedPages)
 		{
 			((Control)orderedPage).SuspendLayout();
@@ -736,7 +738,7 @@ public class MainForm : Form
 		secondaryNav = null;
 		optimizerButton = null;
 		bool flag = IsRunningAsAdministrator();
-		((Control)this).Text = "Astryx Maximum Tweaks Edition — " + maximumSteps.Count + " Tweaks — " + (flag ? "Administrator" : "Administrator Required");
+		((Control)this).Text = "Astryx Tweaks Maximum Tweaks Edition — " + maximumSteps.Count + " Tweaks — " + (flag ? "Administrator" : "Administrator Required");
 		((Form)this).Size = new Size(980, 760);
 		((Control)this).MinimumSize = new Size(900, 680);
 		((Control)this).BackColor = BG;
@@ -767,7 +769,7 @@ public class MainForm : Form
 		{
 		}
 		Label val4 = new Label();
-		((Control)val4).Text = "ASTRYX";
+		((Control)val4).Text = "ASTRYX TWEAKS";
 		((Control)val4).Location = new Point(142, 39);
 		((Control)val4).AutoSize = true;
 		((Control)val4).Font = new Font("Segoe UI Semibold", 25f);
@@ -892,7 +894,7 @@ public class MainForm : Form
 	{
 		//IL_0047: Unknown result type (might be due to invalid IL or missing references)
 		//IL_004d: Invalid comparison between Unknown and I4
-		if (maximumRunning || !EnsureAdministrator() || (int)MessageBox.Show("This will apply exactly " + maximumSteps.Count + " aggressive Windows 11 tweak modules.\n\nThe optimizer can remove built-in apps, disable optional services, and reduce some Windows security features. A restore point will be created first.\n\nContinue?", "Astryx Maximum Tweaks Edition", (MessageBoxButtons)4, (MessageBoxIcon)48) != 6)
+		if (maximumRunning || !EnsureAdministrator() || (int)MessageBox.Show("This will apply exactly " + maximumSteps.Count + " aggressive Windows 11 tweak modules.\n\nThe optimizer can remove built-in apps, disable optional services, and reduce some Windows security features. A restore point will be created first.\n\nContinue?", "Astryx Tweaks Maximum Tweaks Edition", (MessageBoxButtons)4, (MessageBoxIcon)48) != 6)
 		{
 			return;
 		}
@@ -1275,6 +1277,7 @@ public class MainForm : Form
 
 	private void ShowHome()
 	{
+		HideUtilityPages();
 		foreach (Panel key in navMap.Keys)
 		{
 			((Control)key).Visible = false;
@@ -1352,18 +1355,7 @@ public class MainForm : Form
 		((ScrollableControl)homePage).AutoScroll = true;
 		((Control)homePage).Padding = new Padding(28, 20, 28, 28);
 		((Control)this).Controls.Add((Control)(object)homePage);
-		string text = "there";
-		try
-		{
-			text = Environment.UserName;
-			if (string.IsNullOrWhiteSpace(text))
-			{
-				text = "there";
-			}
-		}
-		catch
-		{
-		}
+		string text = string.IsNullOrWhiteSpace(profileName) ? "there" : profileName;
 		Label val = new Label();
 		((Control)val).Text = "Welcome Back, " + text + "!";
 		((Control)val).Font = new Font("Segoe UI Semibold", 21f);
@@ -1371,6 +1363,7 @@ public class MainForm : Form
 		((Control)val).Location = new Point(28, 18);
 		((Control)val).AutoSize = true;
 		((Control)homePage).Controls.Add((Control)(object)val);
+		homeWelcomeLabel = val;
 		Label val2 = new Label();
 		((Control)val2).Text = "Ready to enhance your system performance?";
 		((Control)val2).Font = new Font("Segoe UI", 10.5f);
@@ -1453,7 +1446,7 @@ public class MainForm : Form
 		((Control)val4).AutoSize = true;
 		((Control)val3).Controls.Add((Control)(object)val4);
 		Label val5 = new Label();
-		((Control)val5).Text = "Astryx applies 570+ reversible tweaks and reduces system latency to the minimum possible.";
+		((Control)val5).Text = "Astryx Tweaks applies 570+ reversible tweaks and reduces system latency to the minimum possible.";
 		((Control)val5).Font = FB;
 		((Control)val5).ForeColor = Color.FromArgb(212, 222, 255);
 		((Control)val5).BackColor = Color.Transparent;
@@ -1505,7 +1498,7 @@ public class MainForm : Form
 		((Control)homePage).Controls.Add((Control)(object)val9);
 		homeUpdatesLabel = val9;
 		Label val10 = new Label();
-		((Control)val10).Text = "Astryx Maximum Tweaks Edition";
+		((Control)val10).Text = "Astryx Tweaks Maximum Tweaks Edition";
 		((Control)val10).Font = FB;
 		((Control)val10).ForeColor = ACC;
 		((Control)val10).Location = new Point(560, 666);
@@ -1740,7 +1733,7 @@ public class MainForm : Form
 		((Control)val2).Size = new Size(24, 24);
 		((Control)val2).BackColor = Color.Transparent;
 		((Control)val).Controls.Add((Control)(object)val2);
-		Button val3 = PillButton(btnText + "  ›", comingSoon ? Color.FromArgb(40, 46, 66) : (redTint ? Color.FromArgb(150, 46, 66) : ACC), 116);
+		Button val3 = PillButton(btnText, comingSoon ? Color.FromArgb(40, 46, 66) : (redTint ? Color.FromArgb(150, 46, 66) : ACC), 116);
 		((Control)val3).Location = new Point(num - 128, 14);
 		((Control)val3).Click += click;
 		((Control)val).Controls.Add((Control)(object)val3);
@@ -1899,6 +1892,7 @@ public class MainForm : Form
 		//IL_0121: Expected O, but got Unknown
 		//IL_00a6: Unknown result type (might be due to invalid IL or missing references)
 		//IL_00ac: Expected O, but got Unknown
+		HideUtilityPages();
 		if (homePage != null)
 		{
 			((Control)homePage).Visible = false;
@@ -2126,10 +2120,10 @@ public class MainForm : Form
 		//IL_0161: Expected O, but got Unknown
 		g.SmoothingMode = (SmoothingMode)4;
 		g.TextRenderingHint = (TextRenderingHint)4;
-		Font val = new Font("Segoe UI", 16.5f, (FontStyle)1);
+		Font val = new Font("Segoe UI", 11.5f, (FontStyle)1);
 		try
 		{
-			string text = "ASTRYX";
+			string text = "ASTRYX TWEAKS";
 			PointF pointF = new PointF(0f, 2f);
 			SolidBrush val2 = new SolidBrush(Color.FromArgb(48, 96, 156, 255));
 			try
@@ -2369,7 +2363,7 @@ public class MainForm : Form
 		//IL_04ff: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0505: Invalid comparison between Unknown and I4
 		Form dlg = new Form();
-		((Control)dlg).Text = "Welcome to Astryx";
+		((Control)dlg).Text = "Welcome to Astryx Tweaks";
 		dlg.FormBorderStyle = (FormBorderStyle)0;
 		dlg.StartPosition = (FormStartPosition)1;
 		dlg.Size = new Size(460, 360);
@@ -2396,7 +2390,7 @@ public class MainForm : Form
 		((Control)val).BackColor = ACC;
 		((Control)dlg).Controls.Add((Control)(object)val);
 		Label val2 = new Label();
-		((Control)val2).Text = "Welcome to Astryx";
+		((Control)val2).Text = "Welcome to Astryx Tweaks";
 		((Control)val2).Font = new Font("Segoe UI Semibold", 20f);
 		((Control)val2).ForeColor = TXT;
 		((Control)val2).Location = new Point(30, 30);
@@ -2560,7 +2554,7 @@ public class MainForm : Form
 		((Control)val2).AutoSize = true;
 		((Control)dlg).Controls.Add((Control)(object)val2);
 		TextBox val3 = new TextBox();
-		((Control)val3).Text = "Astryx Restore " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+		((Control)val3).Text = "Astryx Tweaks Restore " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 		((Control)val3).Location = new Point(24, 60);
 		((Control)val3).Size = new Size(392, 26);
 		((TextBoxBase)val3).BorderStyle = (BorderStyle)1;
@@ -2602,7 +2596,7 @@ public class MainForm : Form
 			{
 				return ((Control)val3).Text.Trim();
 			}
-			return "Astryx Restore Point";
+			return "Astryx Tweaks Restore Point";
 		}
 		return null;
 	}
@@ -2784,6 +2778,7 @@ public class MainForm : Form
 
 	private void ShowBackups()
 	{
+		HideUtilityPages();
 		foreach (Panel value in navMap.Values)
 		{
 			((Control)value).Visible = false;
@@ -2808,7 +2803,7 @@ public class MainForm : Form
 
 	private bool CreateBackup()
 	{
-		return CreateNamedRestorePoint("Astryx Maximum Tweaks Edition backup");
+		return CreateNamedRestorePoint("Astryx Tweaks Maximum Tweaks Edition backup");
 	}
 
 	private bool CreateNamedRestorePoint(string name)
@@ -2817,7 +2812,7 @@ public class MainForm : Form
 		//IL_0050: Unknown result type (might be due to invalid IL or missing references)
 		if (string.IsNullOrWhiteSpace(name))
 		{
-			name = "Astryx Restore Point";
+			name = "Astryx Tweaks Restore Point";
 		}
 		Status("Creating restore point...");
 		try
@@ -2931,6 +2926,7 @@ public class MainForm : Form
 
 	private void ShowDefender()
 	{
+		HideUtilityPages();
 		foreach (Panel value in navMap.Values)
 		{
 			((Control)value).Visible = false;
@@ -2954,6 +2950,7 @@ public class MainForm : Form
 
 	private void ShowPower()
 	{
+		HideUtilityPages();
 		foreach (Panel value in navMap.Values)
 		{
 			((Control)value).Visible = false;
@@ -3147,7 +3144,7 @@ public class MainForm : Form
 		((Control)val2).Size = new Size(790, 22);
 		((Control)defenderPage).Controls.Add((Control)(object)val2);
 		Label val3 = new Label();
-		((Control)val3).Text = "⚠  Disabling Defender reduces your security. Windows needs a Defender exclusion for these changes to apply — Astryx adds and removes that exclusion for you automatically.";
+		((Control)val3).Text = "⚠  Disabling Defender reduces your security. Windows needs a Defender exclusion for these changes to apply — Astryx Tweaks adds and removes that exclusion for you automatically.";
 		((Control)val3).Font = FB;
 		((Control)val3).ForeColor = WARN;
 		((Control)val3).Location = new Point(30, 80);
@@ -3220,7 +3217,7 @@ public class MainForm : Form
 		}
 		if (num > 0)
 		{
-			if ((int)MessageBox.Show("You are about to DISABLE " + num + " Windows Defender protection(s).\n\nThis reduces your security. Astryx will also add a Windows Defender exclusion automatically so the changes apply.\n\nDo you REALLY want to do this?", "Confirm Defender changes", (MessageBoxButtons)4, (MessageBoxIcon)48) != 6)
+			if ((int)MessageBox.Show("You are about to DISABLE " + num + " Windows Defender protection(s).\n\nThis reduces your security. Astryx Tweaks will also add a Windows Defender exclusion automatically so the changes apply.\n\nDo you REALLY want to do this?", "Confirm Defender changes", (MessageBoxButtons)4, (MessageBoxIcon)48) != 6)
 			{
 				return;
 			}
@@ -3464,7 +3461,7 @@ public class MainForm : Form
 	{
 		try
 		{
-			Process? process = Process.Start(new ProcessStartInfo("powershell", "-NoProfile -ExecutionPolicy Bypass -Command \"" + script.Replace("\"", "'") + "\"")
+			Process process = Process.Start(new ProcessStartInfo("powershell", "-NoProfile -ExecutionPolicy Bypass -Command \"" + script.Replace("\"", "'") + "\"")
 			{
 				UseShellExecute = false,
 				CreateNoWindow = true,
@@ -5105,7 +5102,7 @@ public class MainForm : Form
 				text += "\nPrint Queue: ";
 				try
 				{
-					Process? process = Process.Start(new ProcessStartInfo("powershell", "-NoProfile -Command \"(Get-PrintJob -PrinterName * -EA 0 | Measure-Object).Count\"")
+					Process process = Process.Start(new ProcessStartInfo("powershell", "-NoProfile -Command \"(Get-PrintJob -PrinterName * -EA 0 | Measure-Object).Count\"")
 					{
 						UseShellExecute = false,
 						CreateNoWindow = true,
@@ -5623,7 +5620,7 @@ public class MainForm : Form
 				Thread.Sleep(150);
 			}
 		}
-		while ((int)MessageBox.Show("Did you follow through with ALL of Talon's instructions and close its PowerShell window?\n\nClick Yes to continue with Astryx's built-in tweaks.\nClick No to open Talon again.", "Talon completion check", (MessageBoxButtons)4, (MessageBoxIcon)32) != 6);
+		while ((int)MessageBox.Show("Did you follow through with ALL of Talon's instructions and close its PowerShell window?\n\nClick Yes to continue with Astryx Tweaks' built-in tweaks.\nClick No to open Talon again.", "Talon completion check", (MessageBoxButtons)4, (MessageBoxIcon)32) != 6);
 	}
 
 	private bool LevelIncludesPage(int level, int idx)
@@ -5779,7 +5776,7 @@ public class MainForm : Form
 			((Control)progress).ForeColor = WARN;
 			((Control)progress).Text = "CANCELLED — " + num3 + " tweak(s) reverted. Your PC was NOT fully optimized.";
 			((TextBoxBase)log).AppendText("\r\n=== CANCELLED ===\r\nReverted " + num3 + " of " + list2.Count + " applied tweaks.\r\n");
-			MessageBox.Show("Optimization cancelled.\n\nEvery tweak that had already been applied has been reverted where an undo exists (" + num3 + " of " + list2.Count + "). Your system could NOT be optimized as expected because you cancelled the process partway through.\n\nAnything launched in a separate window (such as Talon) is not controlled by Astryx and must be closed manually. You can run the optimizer again at any time.", "Optimization cancelled", (MessageBoxButtons)0, (MessageBoxIcon)48);
+			MessageBox.Show("Optimization cancelled.\n\nEvery tweak that had already been applied has been reverted where an undo exists (" + num3 + " of " + list2.Count + "). Your system could NOT be optimized as expected because you cancelled the process partway through.\n\nAnything launched in a separate window (such as Talon) is not controlled by Astryx Tweaks and must be closed manually. You can run the optimizer again at any time.", "Optimization cancelled", (MessageBoxButtons)0, (MessageBoxIcon)48);
 		}
 		else
 		{
@@ -5831,7 +5828,7 @@ public class MainForm : Form
 		//IL_0678: Unknown result type (might be due to invalid IL or missing references)
 		//IL_067e: Invalid comparison between Unknown and I4
 		Form dlg = new Form();
-		((Control)dlg).Text = "Astryx — Before We Optimize";
+		((Control)dlg).Text = "Astryx Tweaks — Before We Optimize";
 		dlg.FormBorderStyle = (FormBorderStyle)0;
 		dlg.StartPosition = (FormStartPosition)4;
 		dlg.Size = new Size(660, 500);
@@ -5879,7 +5876,7 @@ public class MainForm : Form
 		((Control)val4).AutoSize = true;
 		((Control)dlg).Controls.Add((Control)(object)val4);
 		TextBox rpBox = new TextBox();
-		((Control)rpBox).Text = "Astryx Optimizer " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+		((Control)rpBox).Text = "Astryx Tweaks Optimizer " + DateTime.Now.ToString("yyyy-MM-dd HH:mm");
 		((Control)rpBox).Location = new Point(26, 124);
 		((Control)rpBox).Size = new Size(608, 24);
 		((TextBoxBase)rpBox).BorderStyle = (BorderStyle)1;
@@ -5893,7 +5890,7 @@ public class MainForm : Form
 		((Control)val5).BackColor = BG;
 		((Control)dlg).Controls.Add((Control)(object)val5);
 		int ry = 4;
-		ToggleSwitch talonSwitch = AddOptRow(val5, ref ry, "Talon debloat (open-source) — OPTIONAL", "Launches Talon, a separate open-source tool that deep-debloats Windows. It opens first in its own window; Astryx waits until you finish and close it before applying its own tweaks. Not made by Astryx.", ACC2, on: true);
+		ToggleSwitch talonSwitch = AddOptRow(val5, ref ry, "Talon debloat (open-source) — OPTIONAL", "Launches Talon, a separate open-source tool that deep-debloats Windows. It opens first in its own window; Astryx Tweaks waits until you finish and close it before applying its own tweaks. Not made by Astryx Tweaks.", ACC2, on: true);
 		int[] levelSel = new int[1] { 1 };
 		Label val6 = new Label();
 		((Control)val6).Text = "Optimization level";
@@ -5955,7 +5952,7 @@ public class MainForm : Form
 			{
 				RunTalon = ((CheckBox)talonSwitch).Checked,
 				Level = levelSel[0],
-				RestoreName = (string.IsNullOrWhiteSpace(((Control)rpBox).Text) ? ("Astryx Optimizer " + DateTime.Now.ToString("yyyy-MM-dd HH:mm")) : ((Control)rpBox).Text.Trim())
+				RestoreName = (string.IsNullOrWhiteSpace(((Control)rpBox).Text) ? ("Astryx Tweaks Optimizer " + DateTime.Now.ToString("yyyy-MM-dd HH:mm")) : ((Control)rpBox).Text.Trim())
 			};
 			outResult[0] = optimizerOptions;
 			dlg.DialogResult = (DialogResult)1;
