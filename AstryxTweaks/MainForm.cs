@@ -104,8 +104,6 @@ public partial class MainForm : Form
 
 	private Dictionary<Panel, int> gridY = new Dictionary<Panel, int>();
 
-	private Panel contentArea;
-
 	private Panel sidebar;
 
 	private Panel indicator;
@@ -174,15 +172,13 @@ public partial class MainForm : Form
 
 	private System.Windows.Forms.Timer pageAnimation;
 
-	private System.Windows.Forms.Timer indicatorAnimation;
+	private System.Windows.Forms.Timer formFadeAnimation;
 
 	private Dictionary<Control, Point> animatedPositions = new Dictionary<Control, Point>();
 
 	private Dictionary<Control, System.Windows.Forms.Timer> colorAnimations = new Dictionary<Control, System.Windows.Forms.Timer>();
 
 	private Dictionary<Control, System.Windows.Forms.Timer> positionAnimations = new Dictionary<Control, System.Windows.Forms.Timer>();
-
-	private bool optimizerHover;
 
 	private List<MaximumStep> maximumSteps = new List<MaximumStep>();
 
@@ -206,8 +202,6 @@ public partial class MainForm : Form
 
 	private string profileEmail = "";
 
-	private bool allowClose;
-
 	public MainForm()
 	{
 		//IL_0179: Unknown result type (might be due to invalid IL or missing references)
@@ -217,6 +211,7 @@ public partial class MainForm : Form
 		{
 			SetStyle((ControlStyles)139266, true);
 			DoubleBuffered = true;
+			((Form)this).Opacity = 0.0;
 			BuildAll();
 			((Form)this).FormClosing += new FormClosingEventHandler(AnimatedFormClosing);
 		}
@@ -237,6 +232,24 @@ public partial class MainForm : Form
 		try
 		{
 			ApplyDarkScrollbars((Control)this);
+			if (formFadeAnimation != null)
+			{
+				formFadeAnimation.Stop();
+				formFadeAnimation.Dispose();
+			}
+			formFadeAnimation = new System.Windows.Forms.Timer();
+			formFadeAnimation.Interval = 15;
+			formFadeAnimation.Tick += delegate
+			{
+				((Form)this).Opacity = Math.Min(1.0, ((Form)this).Opacity + 0.09);
+				if (((Form)this).Opacity >= 1.0)
+				{
+					formFadeAnimation.Stop();
+					formFadeAnimation.Dispose();
+					formFadeAnimation = null;
+				}
+			};
+			formFadeAnimation.Start();
 		}
 		catch
 		{
@@ -347,7 +360,7 @@ public partial class MainForm : Form
 		((Control)this).MinimumSize = new Size(950, 650);
 		sidebar = new Panel();
 		((Control)sidebar).Dock = (DockStyle)3;
-		((Control)sidebar).Width = 210;
+		((Control)sidebar).Width = 224;
 		((Control)sidebar).BackColor = SIDEBAR;
 		((ScrollableControl)sidebar).AutoScroll = false;
 		((Control)this).Controls.Add((Control)(object)sidebar);
@@ -356,10 +369,10 @@ public partial class MainForm : Form
 			if (((Form)this).Icon != null)
 			{
 				PictureBox val2 = new PictureBox();
-				((Control)val2).Location = new Point(14, 12);
-				((Control)val2).Size = new Size(36, 36);
+				((Control)val2).Location = new Point(16, 14);
+				((Control)val2).Size = new Size(32, 32);
 				val2.SizeMode = (PictureBoxSizeMode)4;
-				val2.Image = (Image)new Icon(((Form)this).Icon, 36, 36).ToBitmap();
+				val2.Image = (Image)new Icon(((Form)this).Icon, 32, 32).ToBitmap();
 				((Control)val2).BackColor = Color.Transparent;
 				((Control)sidebar).Controls.Add((Control)(object)val2);
 			}
@@ -368,8 +381,8 @@ public partial class MainForm : Form
 		{
 		}
 		Panel val3 = new Panel();
-		((Control)val3).Location = new Point(56, 9);
-		((Control)val3).Size = new Size(150, 30);
+		((Control)val3).Location = new Point(58, 12);
+		((Control)val3).Size = new Size(158, 24);
 		((Control)val3).BackColor = SIDEBAR;
 		((Control)val3).Paint += (PaintEventHandler)delegate(object _ls, PaintEventArgs _le)
 		{
@@ -377,10 +390,10 @@ public partial class MainForm : Form
 		};
 		((Control)sidebar).Controls.Add((Control)(object)val3);
 		Label val4 = new Label();
-		((Control)val4).Text = "TWEAKS";
+		((Control)val4).Text = "SYSTEM OPTIMIZER";
 		((Control)val4).Font = FS;
 		((Control)val4).ForeColor = ACC;
-		((Control)val4).Location = new Point(59, 39);
+		((Control)val4).Location = new Point(59, 37);
 		((Control)val4).AutoSize = true;
 		((Control)sidebar).Controls.Add((Control)(object)val4);
 		indicator = new Panel();
@@ -510,61 +523,21 @@ public partial class MainForm : Form
 			ShowGroup("Privacy");
 		});
 		BuildSidebarUtilities();
-		contentArea = new Panel();
-		((Control)contentArea).Dock = (DockStyle)5;
-		((Control)contentArea).BackColor = BG;
-		((Control)this).Controls.Add((Control)(object)contentArea);
 		Panel val12 = new Panel();
-		((Control)val12).Dock = (DockStyle)1;
-		((Control)val12).Height = 50;
-		((Control)val12).BackColor = BG;
-		((Control)contentArea).Controls.Add((Control)(object)val12);
-		Panel val13 = new Panel();
-		((Control)val13).Dock = (DockStyle)1;
-		((Control)val13).Height = 2;
-		((Control)val13).BackColor = Color.FromArgb(56, 108, 230);
-		((Control)val12).Controls.Add((Control)(object)val13);
-		Label val14 = new Label();
-		((Control)val14).Text = "✧  Astryx Tweaks  •  Windows performance controls";
-		((Control)val14).AutoSize = true;
-		((Control)val14).Font = FB;
-		((Control)val14).ForeColor = Color.FromArgb(220, 225, 255);
-		((Control)val14).Location = new Point(300, 16);
-		((Control)val12).Controls.Add((Control)(object)val14);
-		Button val15 = new Button();
-		((Control)val15).Text = "Create Restore Point";
-		((Control)val15).Location = new Point(10, 10);
-		((Control)val15).Size = new Size(155, 30);
-		((ButtonBase)val15).FlatStyle = (FlatStyle)0;
-		((Control)val15).BackColor = ACC;
-		((Control)val15).ForeColor = Color.White;
-		((ButtonBase)val15).FlatAppearance.BorderSize = 0;
-		((Control)val15).Click += RPClick;
-		((Control)val12).Controls.Add((Control)(object)val15);
-		searchBox = new TextBox();
-		((Control)searchBox).Location = new Point(170, 13);
-		((Control)searchBox).Size = new Size(220, 24);
-		((Control)searchBox).Text = "Search...";
-		((Control)searchBox).ForeColor = Color.Gray;
-		((Control)searchBox).BackColor = SIDEBAR;
-		((Control)searchBox).GotFocus += SearchFocus;
-		((Control)searchBox).LostFocus += SearchBlur;
-		((Control)searchBox).TextChanged += SearchChange;
-		((Control)val12).Controls.Add((Control)(object)searchBox);
-		Panel val16 = new Panel();
-		((Control)val16).Dock = (DockStyle)2;
-		((Control)val16).Height = 28;
-		((Control)val16).BackColor = Color.FromArgb(18, 18, 28);
-		((Control)this).Controls.Add((Control)(object)val16);
+		((Control)val12).Dock = (DockStyle)2;
+		((Control)val12).Height = 28;
+		((Control)val12).BackColor = Color.FromArgb(10, 16, 28);
+		((Control)this).Controls.Add((Control)(object)val12);
 		statusLbl = new Label();
 		((Control)statusLbl).Dock = (DockStyle)5;
 		((Control)statusLbl).ForeColor = GRN;
 		statusLbl.TextAlign = (ContentAlignment)16;
 		((Control)statusLbl).Text = "  Ready. Create a restore point, then apply tweaks.";
-		((Control)val16).Controls.Add((Control)(object)statusLbl);
+		((Control)val12).Controls.Add((Control)(object)statusLbl);
 		secondaryNav = new Panel();
-		((Control)secondaryNav).Location = new Point(230, 54);
-		((Control)secondaryNav).Size = new Size(780, 44);
+		((Control)secondaryNav).Location = new Point(240, 8);
+		((Control)secondaryNav).Size = new Size(980, 44);
+		((Control)secondaryNav).Anchor = (AnchorStyles)13;
 		((Control)secondaryNav).BackColor = BG;
 		((Control)secondaryNav).Visible = false;
 		((Control)this).Controls.Add((Control)(object)secondaryNav);
@@ -606,7 +579,6 @@ public partial class MainForm : Form
 		ApplyRoundedStyle((Control)this);
 		StartOptimizerGlow();
 		ShowHome();
-		((Form)this).Opacity = 1.0;
 	}
 
 	private void BuildMaximumEdition()
@@ -1003,7 +975,6 @@ public partial class MainForm : Form
 				Verb = "runas",
 				WorkingDirectory = Path.GetDirectoryName(Application.ExecutablePath)
 			});
-			allowClose = true;
 			((Form)this).Close();
 		}
 		catch (Exception ex)
@@ -1085,12 +1056,12 @@ public partial class MainForm : Form
 		Button val = new Button();
 		((Control)val).Text = text;
 		((ButtonBase)val).TextAlign = (ContentAlignment)16;
-		((Control)val).Location = new Point(7, y);
-		((Control)val).Size = new Size(194, 34);
+		((Control)val).Location = new Point(8, y);
+		((Control)val).Size = new Size(208, 34);
 		((ButtonBase)val).FlatStyle = (FlatStyle)0;
 		((ButtonBase)val).FlatAppearance.BorderSize = 0;
-		((Control)val).BackColor = Color.FromArgb(14, 36, 72);
-		((Control)val).ForeColor = Color.FromArgb(184, 211, 255);
+		((Control)val).BackColor = Color.FromArgb(12, 25, 45);
+		((Control)val).ForeColor = Color.FromArgb(196, 212, 238);
 		((Control)val).Font = FB;
 		((Control)val).Padding = new Padding(13, 0, 0, 0);
 		((Control)val).Cursor = Cursors.Hand;
@@ -1098,24 +1069,17 @@ public partial class MainForm : Form
 		{
 			//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 			//IL_0048: Expected O, but got Unknown
-			if (val == optimizerButton)
-			{
-				optimizerHover = true;
-			}
-			AnimateBackColor((Control)val, Color.FromArgb(28, 78, 166), 160);
+			AnimateBackColor((Control)val, Color.FromArgb(24, 58, 106), 150);
 		};
 		((Control)val).MouseLeave += delegate
 		{
 			//IL_002b: Unknown result type (might be due to invalid IL or missing references)
 			//IL_0068: Expected O, but got Unknown
-			if (val == optimizerButton)
-			{
-				optimizerHover = false;
-			}
-			AnimateBackColor((Control)val, (val == optimizerButton) ? Color.FromArgb(34, 103, 239) : Color.FromArgb(14, 36, 72), 210);
+			AnimateBackColor((Control)val, (val == optimizerButton) ? Color.FromArgb(34, 103, 239) : Color.FromArgb(12, 25, 45), 200);
 		};
 		((Control)val).Click += click;
 		((Control)sidebar).Controls.Add((Control)(object)val);
+		RoundControl((Control)val, 9);
 		return val;
 	}
 
@@ -1224,6 +1188,7 @@ public partial class MainForm : Form
 		//IL_01f3: Unknown result type (might be due to invalid IL or missing references)
 		//IL_01ff: Expected O, but got Unknown
 		((Control)secondaryNav).Controls.Clear();
+		((Control)secondaryNav).Width = Math.Max(620, ((Control)this).ClientSize.Width - ((Control)sidebar).Width - 32);
 		int num = 0;
 		foreach (Panel key in navMap.Keys)
 		{
@@ -1273,6 +1238,23 @@ public partial class MainForm : Form
 			RoundControl((Control)val3, 9);
 			num += ((Control)val3).Width + 4;
 		}
+		int searchWidth = 210;
+		if (num + searchWidth + 18 <= ((Control)secondaryNav).Width)
+		{
+			searchBox = new TextBox();
+			((Control)searchBox).Location = new Point(((Control)secondaryNav).Width - searchWidth - 8, 8);
+			((Control)searchBox).Size = new Size(searchWidth, 26);
+			((Control)searchBox).Anchor = (AnchorStyles)9;
+			((Control)searchBox).Text = "Search tweaks...";
+			((Control)searchBox).ForeColor = Color.FromArgb(118, 132, 160);
+			((Control)searchBox).BackColor = Color.FromArgb(14, 24, 42);
+			((TextBoxBase)searchBox).BorderStyle = (BorderStyle)1;
+			((Control)searchBox).GotFocus += SearchFocus;
+			((Control)searchBox).LostFocus += SearchBlur;
+			((Control)searchBox).TextChanged += SearchChange;
+			((Control)secondaryNav).Controls.Add((Control)(object)searchBox);
+			RoundControl((Control)searchBox, 7);
+		}
 	}
 
 	private void ShowHome()
@@ -1300,8 +1282,8 @@ public partial class MainForm : Form
 		{
 			((Control)powerPage).Visible = false;
 		}
-		((Control)homePage).Location = new Point(((Control)sidebar).Width, 50);
-		((Control)homePage).Size = new Size(Math.Max(760, ((Control)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(560, ((Control)this).ClientSize.Height - 78));
+		((Control)homePage).Location = new Point(((Control)sidebar).Width, 0);
+		((Control)homePage).Size = new Size(Math.Max(760, ((Control)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(560, ((Control)this).ClientSize.Height - 28));
 		((Control)homePage).Visible = true;
 		((Control)homePage).BringToFront();
 		RelayoutHome();
@@ -1348,7 +1330,7 @@ public partial class MainForm : Form
 		//IL_070c: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0713: Expected O, but got Unknown
 		homePage = new Panel();
-		((Control)homePage).Location = new Point(210, 50);
+		((Control)homePage).Location = new Point(224, 0);
 		((Control)homePage).Size = new Size(840, 700);
 		((Control)homePage).Anchor = (AnchorStyles)15;
 		((Control)homePage).BackColor = BG;
@@ -1954,27 +1936,72 @@ public partial class MainForm : Form
 
 	private void AnimateIndicator(int targetY)
 	{
-		if (indicatorAnimation != null)
-		{
-			indicatorAnimation.Stop();
-			((Component)(object)indicatorAnimation).Dispose();
-			indicatorAnimation = null;
-		}
 		if (indicator != null)
 		{
-			((Control)indicator).Top = targetY;
+			AnimatePosition((Control)indicator, new Point(((Control)indicator).Left, targetY), 190);
 		}
 	}
 
 	private void AnimatePage(Panel page)
 	{
-		if (page != null && pageAnimation != null)
+		if (page == null || page.IsDisposed)
+		{
+			return;
+		}
+		if (pageAnimation != null)
+		{
+			pageAnimation.Stop();
+			((Component)(object)pageAnimation).Dispose();
+			pageAnimation = null;
+		}
+		foreach (KeyValuePair<Control, Point> animatedPosition in animatedPositions)
+		{
+			if (!animatedPosition.Key.IsDisposed)
+			{
+				animatedPosition.Key.Location = animatedPosition.Value;
+			}
+		}
+		animatedPositions.Clear();
+
+		if (page.Dock == DockStyle.None)
+		{
+			Point target = page.Location;
+			animatedPositions[page] = target;
+			page.Location = new Point(target.X + 18, target.Y);
+			AnimatePosition(page, target, 230);
+		}
+		else
+		{
+			int viewportTop = -page.AutoScrollPosition.Y;
+			Rectangle viewport = new Rectangle(0, viewportTop, page.ClientSize.Width, page.ClientSize.Height);
+			int count = 0;
+			foreach (Control control in page.Controls)
+			{
+				if (!control.Visible || control.Dock != DockStyle.None || !viewport.IntersectsWith(control.Bounds))
+				{
+					continue;
+				}
+				Point target = control.Location;
+				animatedPositions[control] = target;
+				control.Location = new Point(target.X, target.Y + 12);
+				AnimatePosition(control, target, 180 + Math.Min(90, count * 8));
+				count++;
+				if (count >= 18)
+				{
+					break;
+				}
+			}
+		}
+		pageAnimation = new System.Windows.Forms.Timer();
+		pageAnimation.Interval = 320;
+		pageAnimation.Tick += delegate
 		{
 			pageAnimation.Stop();
 			((Component)(object)pageAnimation).Dispose();
 			pageAnimation = null;
 			animatedPositions.Clear();
-		}
+		};
+		pageAnimation.Start();
 	}
 
 	private void StartOptimizerGlow()
@@ -2008,21 +2035,22 @@ public partial class MainForm : Form
 				((ButtonBase)button).FlatStyle = (FlatStyle)0;
 				((ButtonBase)button).UseMnemonic = false;
 				((ButtonBase)button).FlatAppearance.BorderSize = ((((Control)button).Height >= 60) ? 1 : 0);
+				bool preserveColor = string.Equals(((Control)button).Tag as string, "preserve-color", StringComparison.Ordinal) || string.Equals(((Control)button).Tag as string, "theme-preview", StringComparison.Ordinal);
 				if ((object)((Control)button).Parent == sidebar)
 				{
-					((Control)button).BackColor = ((button == optimizerButton) ? Color.FromArgb(34, 103, 239) : Color.FromArgb(14, 36, 72));
+					((Control)button).BackColor = ((button == optimizerButton) ? Color.FromArgb(34, 103, 239) : Color.FromArgb(12, 25, 45));
 				}
-				else if (((Control)button).Height >= 60)
+				else if (!preserveColor && ((Control)button).Height >= 60)
 				{
 					((Control)button).BackColor = Color.FromArgb(16, 45, 93);
 				}
-				else
+				else if (!preserveColor)
 				{
 					((Control)button).BackColor = ACC;
 				}
 				((Control)button).ForeColor = Color.White;
 				RoundControl((Control)button, (((Control)button).Height >= 60) ? 15 : 9);
-				if ((object)((Control)button).Parent != sidebar && ((Control)button).Height < 60 && ((Control)button).Text.IndexOf("OPTIMIZE", StringComparison.OrdinalIgnoreCase) < 0)
+				if (!preserveColor && (object)((Control)button).Parent != sidebar && ((Control)button).Height < 60 && ((Control)button).Text.IndexOf("OPTIMIZE", StringComparison.OrdinalIgnoreCase) < 0)
 				{
 					Color restColor = ((Control)button).BackColor;
 					((Control)button).MouseEnter += delegate
@@ -2120,42 +2148,19 @@ public partial class MainForm : Form
 		//IL_0161: Expected O, but got Unknown
 		g.SmoothingMode = (SmoothingMode)4;
 		g.TextRenderingHint = (TextRenderingHint)4;
-		Font val = new Font("Segoe UI", 11.5f, (FontStyle)1);
+		Font val = new Font("Segoe UI Semibold", 11f, (FontStyle)1);
 		try
 		{
 			string text = "ASTRYX TWEAKS";
-			PointF pointF = new PointF(0f, 2f);
-			SolidBrush val2 = new SolidBrush(Color.FromArgb(48, 96, 156, 255));
+			PointF pointF = new PointF(0f, 1f);
+			LinearGradientBrush val2 = new LinearGradientBrush(new Rectangle(0, 0, Math.Max(1, area.Width), Math.Max(1, area.Height)), Color.FromArgb(224, 238, 255), Color.FromArgb(147, 174, 255), (LinearGradientMode)0);
 			try
 			{
-				for (int i = 1; i <= 4; i++)
-				{
-					g.DrawString(text, val, (Brush)(object)val2, new PointF(pointF.X, pointF.Y + (float)i));
-					g.DrawString(text, val, (Brush)(object)val2, new PointF(pointF.X + (float)i, pointF.Y));
-					g.DrawString(text, val, (Brush)(object)val2, new PointF(pointF.X - (float)i, pointF.Y));
-				}
+				g.DrawString(text, val, (Brush)(object)val2, pointF);
 			}
 			finally
 			{
 				((IDisposable)val2)?.Dispose();
-			}
-			SolidBrush val3 = new SolidBrush(Color.FromArgb(120, 0, 0, 0));
-			try
-			{
-				g.DrawString(text, val, (Brush)(object)val3, new PointF(pointF.X + 1.3f, pointF.Y + 1.7f));
-			}
-			finally
-			{
-				((IDisposable)val3)?.Dispose();
-			}
-			LinearGradientBrush val4 = new LinearGradientBrush(new Rectangle(0, 0, Math.Max(1, area.Width), Math.Max(1, area.Height)), Color.FromArgb(130, 205, 255), Color.FromArgb(150, 108, 255), (LinearGradientMode)0);
-			try
-			{
-				g.DrawString(text, val, (Brush)(object)val4, pointF);
-			}
-			finally
-			{
-				((IDisposable)val4)?.Dispose();
 			}
 		}
 		finally
@@ -2172,7 +2177,7 @@ public partial class MainForm : Form
 		//IL_0095: Unknown result type (might be due to invalid IL or missing references)
 		Control c = (Control)(object)card;
 		bool[] hover = new bool[1];
-		RoundControl(c, 10);
+		RoundControl(c, 13);
 		c.Paint += (PaintEventHandler)delegate(object _cs, PaintEventArgs _ce)
 		{
 			//IL_007f: Unknown result type (might be due to invalid IL or missing references)
@@ -2181,10 +2186,10 @@ public partial class MainForm : Form
 			//IL_00c3: Expected O, but got Unknown
 			Graphics graphics = _ce.Graphics;
 			graphics.SmoothingMode = (SmoothingMode)4;
-			GraphicsPath val2 = RoundedPath(new Rectangle(0, 0, c.Width - 1, c.Height - 1), 10);
+			GraphicsPath val2 = RoundedPath(new Rectangle(0, 0, c.Width - 1, c.Height - 1), 13);
 			try
 			{
-				Pen val3 = new Pen(hover[0] ? Color.FromArgb(205, 108, 165, 255) : Color.FromArgb(95, 74, 120, 205), hover[0] ? 1.7f : 1f);
+				Pen val3 = new Pen(hover[0] ? Color.FromArgb(170, 108, 165, 255) : Color.FromArgb(58, 74, 120, 205), hover[0] ? 1.5f : 1f);
 				try
 				{
 					graphics.DrawPath(val3, val2);
@@ -2213,7 +2218,7 @@ public partial class MainForm : Form
 			if (!hover[0])
 			{
 				hover[0] = true;
-				AnimateBackColor(c, Blend(CARD_BOT, ACC, 0.17f), 140);
+				AnimateBackColor(c, Blend(CARD_BOT, ACC, 0.12f), 150);
 				c.Invalidate();
 			}
 		};
@@ -2256,18 +2261,95 @@ public partial class MainForm : Form
 
 	private void AnimateBackColor(Control control, Color target, int duration)
 	{
-		if (control != null && !control.IsDisposed)
+		if (control == null || control.IsDisposed)
+		{
+			return;
+		}
+		if (colorAnimations.TryGetValue(control, out System.Windows.Forms.Timer existing))
+		{
+			existing.Stop();
+			existing.Dispose();
+			colorAnimations.Remove(control);
+		}
+		Color start = control.BackColor;
+		if (start == target || duration <= 0)
 		{
 			control.BackColor = target;
+			return;
 		}
+		DateTime started = DateTime.UtcNow;
+		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+		timer.Interval = 15;
+		colorAnimations[control] = timer;
+		timer.Tick += delegate
+		{
+			if (control.IsDisposed)
+			{
+				timer.Stop();
+				timer.Dispose();
+				colorAnimations.Remove(control);
+				return;
+			}
+			float progress = (float)(DateTime.UtcNow - started).TotalMilliseconds / Math.Max(1, duration);
+			if (progress >= 1f)
+			{
+				control.BackColor = target;
+				timer.Stop();
+				timer.Dispose();
+				colorAnimations.Remove(control);
+				return;
+			}
+			control.BackColor = Blend(start, target, EaseOutCubic(progress));
+		};
+		timer.Start();
 	}
 
 	private void AnimatePosition(Control control, Point target, int duration)
 	{
-		if (control != null && !control.IsDisposed)
+		if (control == null || control.IsDisposed)
+		{
+			return;
+		}
+		if (positionAnimations.TryGetValue(control, out System.Windows.Forms.Timer existing))
+		{
+			existing.Stop();
+			existing.Dispose();
+			positionAnimations.Remove(control);
+		}
+		Point start = control.Location;
+		if (start == target || duration <= 0)
 		{
 			control.Location = target;
+			return;
 		}
+		DateTime started = DateTime.UtcNow;
+		System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
+		timer.Interval = 15;
+		positionAnimations[control] = timer;
+		timer.Tick += delegate
+		{
+			if (control.IsDisposed)
+			{
+				timer.Stop();
+				timer.Dispose();
+				positionAnimations.Remove(control);
+				return;
+			}
+			float progress = (float)(DateTime.UtcNow - started).TotalMilliseconds / Math.Max(1, duration);
+			if (progress >= 1f)
+			{
+				control.Location = target;
+				timer.Stop();
+				timer.Dispose();
+				positionAnimations.Remove(control);
+				return;
+			}
+			float eased = EaseOutCubic(progress);
+			control.Location = new Point(
+				start.X + (int)((target.X - start.X) * eased),
+				start.Y + (int)((target.Y - start.Y) * eased));
+		};
+		timer.Start();
 	}
 
 	private void AnimatedFormClosing(object sender, FormClosingEventArgs e)
@@ -2277,10 +2359,6 @@ public partial class MainForm : Form
 		{
 			((CancelEventArgs)(object)e).Cancel = true;
 			MessageBox.Show("The Maximum optimizer is still running. Wait for all tweaks to finish before closing.", "Optimization in progress", (MessageBoxButtons)0, (MessageBoxIcon)64);
-		}
-		else
-		{
-			allowClose = true;
 		}
 	}
 
@@ -2699,7 +2777,7 @@ public partial class MainForm : Form
 		//IL_01f4: Unknown result type (might be due to invalid IL or missing references)
 		//IL_01fe: Expected O, but got Unknown
 		backupPage = new Panel();
-		((Control)backupPage).Location = new Point(210, 50);
+		((Control)backupPage).Location = new Point(224, 0);
 		((Control)backupPage).Size = new Size(840, 700);
 		((Control)backupPage).Anchor = (AnchorStyles)15;
 		((Control)backupPage).BackColor = BG;
@@ -2793,8 +2871,8 @@ public partial class MainForm : Form
 		{
 			((Control)powerPage).Visible = false;
 		}
-		((Control)backupPage).Location = new Point(((Control)sidebar).Width, 50);
-		((Control)backupPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 78));
+		((Control)backupPage).Location = new Point(((Control)sidebar).Width, 0);
+		((Control)backupPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 28));
 		((Control)backupPage).Visible = true;
 		((Control)backupPage).BringToFront();
 		AnimatePage(backupPage);
@@ -2941,8 +3019,8 @@ public partial class MainForm : Form
 		{
 			((Control)powerPage).Visible = false;
 		}
-		((Control)defenderPage).Location = new Point(((Control)sidebar).Width, 50);
-		((Control)defenderPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 78));
+		((Control)defenderPage).Location = new Point(((Control)sidebar).Width, 0);
+		((Control)defenderPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 28));
 		((Control)defenderPage).Visible = true;
 		((Control)defenderPage).BringToFront();
 		AnimatePage(defenderPage);
@@ -2965,8 +3043,8 @@ public partial class MainForm : Form
 		{
 			((Control)defenderPage).Visible = false;
 		}
-		((Control)powerPage).Location = new Point(((Control)sidebar).Width, 50);
-		((Control)powerPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 78));
+		((Control)powerPage).Location = new Point(((Control)sidebar).Width, 0);
+		((Control)powerPage).Size = new Size(Math.Max(760, ((Form)this).ClientSize.Width - ((Control)sidebar).Width), Math.Max(580, ((Form)this).ClientSize.Height - 28));
 		((Control)powerPage).Visible = true;
 		((Control)powerPage).BringToFront();
 		AnimatePage(powerPage);
@@ -3122,7 +3200,7 @@ public partial class MainForm : Form
 		//IL_038a: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0394: Expected O, but got Unknown
 		defenderPage = new Panel();
-		((Control)defenderPage).Location = new Point(210, 50);
+		((Control)defenderPage).Location = new Point(224, 0);
 		((Control)defenderPage).Size = new Size(840, 700);
 		((Control)defenderPage).Anchor = (AnchorStyles)15;
 		((Control)defenderPage).BackColor = BG;
@@ -3277,7 +3355,7 @@ public partial class MainForm : Form
 		//IL_0224: Unknown result type (might be due to invalid IL or missing references)
 		//IL_022e: Expected O, but got Unknown
 		powerPage = new Panel();
-		((Control)powerPage).Location = new Point(210, 50);
+		((Control)powerPage).Location = new Point(224, 0);
 		((Control)powerPage).Size = new Size(840, 700);
 		((Control)powerPage).Anchor = (AnchorStyles)15;
 		((Control)powerPage).BackColor = BG;
@@ -3481,7 +3559,7 @@ public partial class MainForm : Form
 
 	private void SearchFocus(object s, EventArgs e)
 	{
-		if (((Control)searchBox).ForeColor == Color.Gray)
+		if (searchBox != null && (((Control)searchBox).ForeColor == Color.Gray || ((Control)searchBox).Text == "Search tweaks..."))
 		{
 			((Control)searchBox).Text = "";
 			((Control)searchBox).ForeColor = TXT;
@@ -3490,10 +3568,10 @@ public partial class MainForm : Form
 
 	private void SearchBlur(object s, EventArgs e)
 	{
-		if (string.IsNullOrEmpty(((Control)searchBox).Text))
+		if (searchBox != null && string.IsNullOrEmpty(((Control)searchBox).Text))
 		{
-			((Control)searchBox).Text = "Search...";
-			((Control)searchBox).ForeColor = Color.Gray;
+			((Control)searchBox).Text = "Search tweaks...";
+			((Control)searchBox).ForeColor = Color.FromArgb(118, 132, 160);
 		}
 	}
 
@@ -3504,7 +3582,11 @@ public partial class MainForm : Form
 
 	private void DoSearch(object s, EventArgs e)
 	{
-		string value = ((((Control)searchBox).ForeColor == Color.Gray) ? "" : ((Control)searchBox).Text.ToLower());
+		if (searchBox == null || searchBox.IsDisposed)
+		{
+			return;
+		}
+		string value = ((((Control)searchBox).Text == "Search tweaks...") ? "" : ((Control)searchBox).Text.ToLower());
 		foreach (CheckBox item in allCB)
 		{
 			tweakCards[item].Visible = string.IsNullOrEmpty(value) || tweakCards[item].Controls[1].Text.ToLower().Contains(value);
@@ -3533,7 +3615,7 @@ public partial class MainForm : Form
 	{
 		//IL_002a: Unknown result type (might be due to invalid IL or missing references)
 		//IL_0030: Expected O, but got Unknown
-		int num = (gridY.ContainsKey(p) ? (gridY[p] + 14) : ((y == 5) ? 14 : y));
+		int num = (gridY.ContainsKey(p) ? (gridY[p] + 14) : ((y == 5) ? 62 : y));
 		Label val = new Label();
 		((Control)val).Text = t;
 		((Control)val).Font = FH;

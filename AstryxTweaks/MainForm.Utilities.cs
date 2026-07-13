@@ -32,6 +32,10 @@ public partial class MainForm
 	private Label sidebarProfileInitialLabel;
 	private Label homeWelcomeLabel;
 	private string currentThemeName = "Astryx Tweaks Blue";
+	private readonly Dictionary<Button, Color> buttonRestColors = new Dictionary<Button, Color>();
+	private readonly Dictionary<Button, Color> buttonHoverColors = new Dictionary<Button, Color>();
+	private readonly Dictionary<Button, Point> buttonRestPositions = new Dictionary<Button, Point>();
+	private readonly HashSet<Button> animatedButtons = new HashSet<Button>();
 
 	private List<ThemePreset> GetThemePresets()
 	{
@@ -152,31 +156,39 @@ public partial class MainForm
 		Panel container = new Panel
 		{
 			Dock = DockStyle.Bottom,
-			Height = 112,
-			BackColor = Color.FromArgb(14, 22, 40)
+			Height = 124,
+			BackColor = SIDEBAR
 		};
 		sidebar.Controls.Add(container);
 
-		Button accountButton = CreateUtilityButton("Account", 6, 64);
+		Panel divider = new Panel
+		{
+			Location = new Point(12, 0),
+			Size = new Size(200, 1),
+			BackColor = Color.FromArgb(42, 62, 94)
+		};
+		container.Controls.Add(divider);
+
+		Button accountButton = CreateUtilityButton("Account", 8, 66);
 		accountButton.Click += delegate { ShowUtilityPage(accountPage); };
 		container.Controls.Add(accountButton);
 
-		Button themesButton = CreateUtilityButton("Themes", 70, 60);
+		Button themesButton = CreateUtilityButton("Themes", 78, 64);
 		themesButton.Click += delegate { ShowUtilityPage(themesPage); };
 		container.Controls.Add(themesButton);
 
-		Button networkButton = CreateUtilityButton("Network", 130, 68);
+		Button networkButton = CreateUtilityButton("Network", 146, 70);
 		networkButton.Click += delegate { ShowUtilityPage(steamNetworkPage); };
 		container.Controls.Add(networkButton);
 
 		Panel avatar = new Panel
 		{
-			Location = new Point(12, 55),
-			Size = new Size(34, 34),
+			Location = new Point(14, 66),
+			Size = new Size(38, 38),
 			BackColor = ACC,
 			Cursor = Cursors.Hand
 		};
-		RoundControl(avatar, 17);
+		RoundControl(avatar, 19);
 		avatar.Click += delegate { ShowUtilityPage(accountPage); };
 		container.Controls.Add(avatar);
 
@@ -194,8 +206,8 @@ public partial class MainForm
 
 		sidebarProfileNameLabel = new Label
 		{
-			Location = new Point(54, 53),
-			Size = new Size(140, 20),
+			Location = new Point(62, 64),
+			Size = new Size(146, 20),
 			Font = FB,
 			ForeColor = TXT,
 			AutoEllipsis = true,
@@ -207,8 +219,8 @@ public partial class MainForm
 		Label plan = new Label
 		{
 			Text = "Astryx Tweaks profile",
-			Location = new Point(54, 75),
-			Size = new Size(140, 18),
+			Location = new Point(62, 87),
+			Size = new Size(146, 18),
 			Font = FS,
 			ForeColor = ACC,
 			Cursor = Cursors.Hand
@@ -223,15 +235,18 @@ public partial class MainForm
 		Button button = new Button
 		{
 			Text = text,
-			Location = new Point(x, 8),
-			Size = new Size(width, 34),
+			Location = new Point(x, 12),
+			Size = new Size(width, 38),
 			FlatStyle = FlatStyle.Flat,
-			BackColor = Color.FromArgb(18, 51, 104),
-			ForeColor = Color.FromArgb(188, 215, 255),
+			BackColor = Color.FromArgb(14, 29, 52),
+			ForeColor = Color.FromArgb(198, 216, 241),
 			Font = FS,
-			Cursor = Cursors.Hand
+			Cursor = Cursors.Hand,
+			Tag = "preserve-color"
 		};
 		button.FlatAppearance.BorderSize = 0;
+		RoundControl(button, 9);
+		AttachButtonMotion(button, button.BackColor, Blend(button.BackColor, ACC, 0.3f));
 		return button;
 	}
 
@@ -246,7 +261,7 @@ public partial class MainForm
 	{
 		Panel page = new Panel
 		{
-			Location = new Point(210, 50),
+			Location = new Point(224, 0),
 			Size = new Size(840, 700),
 			Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
 			BackColor = BG,
@@ -258,9 +273,9 @@ public partial class MainForm
 		Label titleLabel = new Label
 		{
 			Text = title,
-			Font = new Font("Segoe UI Semibold", 22f),
+			Font = new Font("Segoe UI Semibold", 24f),
 			ForeColor = TXT,
-			Location = new Point(28, 24),
+			Location = new Point(34, 28),
 			AutoSize = true
 		};
 		page.Controls.Add(titleLabel);
@@ -270,17 +285,26 @@ public partial class MainForm
 			Text = subtitle,
 			Font = FB,
 			ForeColor = MUTED,
-			Location = new Point(30, 64),
+			Location = new Point(36, 72),
 			Size = new Size(760, 40)
 		};
 		page.Controls.Add(subtitleLabel);
+
+		Panel accent = new Panel
+		{
+			Location = new Point(20, 31),
+			Size = new Size(4, 30),
+			BackColor = ACC
+		};
+		RoundControl(accent, 2);
+		page.Controls.Add(accent);
 		return page;
 	}
 
 	private void BuildAccountPage()
 	{
 		accountPage = CreateUtilityPage("Account", "Change the display name used throughout Astryx Tweaks.");
-		Panel card = CreateUtilityCard(accountPage, 28, 112, 620, 220);
+		Panel card = CreateUtilityCard(accountPage, 34, 120, 680, 230);
 
 		Label nameLabel = new Label
 		{
@@ -296,7 +320,7 @@ public partial class MainForm
 		{
 			Text = profileName,
 			Location = new Point(24, 55),
-			Size = new Size(570, 30),
+			Size = new Size(632, 32),
 			BackColor = Color.FromArgb(18, 26, 46),
 			ForeColor = TXT,
 			Font = new Font("Segoe UI", 11f),
@@ -324,7 +348,7 @@ public partial class MainForm
 		};
 		card.Controls.Add(result);
 
-		Button saveButton = CreatePrimaryButton("Save name", 414, 150, 180);
+		Button saveButton = CreatePrimaryButton("Save name", 476, 160, 180);
 		saveButton.Click += delegate
 		{
 			string name = nameBox.Text.Trim();
@@ -342,6 +366,7 @@ public partial class MainForm
 			Status("Account name updated.");
 		};
 		card.Controls.Add(saveButton);
+		StyleCard(card);
 	}
 
 	private void BuildThemesPage()
@@ -351,9 +376,9 @@ public partial class MainForm
 		for (int i = 0; i < presets.Count; i++)
 		{
 			ThemePreset preset = presets[i];
-			int x = 28 + i % 2 * 330;
-			int y = 112 + i / 2 * 150;
-			Panel card = CreateUtilityCard(themesPage, x, y, 310, 130);
+			int x = 34 + i % 2 * 350;
+			int y = 120 + i / 2 * 154;
+			Panel card = CreateUtilityCard(themesPage, x, y, 330, 134);
 
 			Panel swatch = new Panel
 			{
@@ -381,26 +406,28 @@ public partial class MainForm
 				Font = FS,
 				ForeColor = MUTED,
 				Location = new Point(76, 43),
-				Size = new Size(215, 36)
+				Size = new Size(230, 36)
 			};
 			card.Controls.Add(description);
 
-			Button apply = CreatePrimaryButton("Use theme", 176, 88, 116);
+			Button apply = CreatePrimaryButton("Use theme", 196, 90, 116);
 			apply.BackColor = preset.Accent;
 			apply.Tag = "theme-preview";
+			AttachButtonMotion(apply, preset.Accent, Blend(preset.Accent, Color.White, 0.15f));
 			apply.Click += delegate
 			{
 				ApplyTheme(preset);
 				Status(preset.Name + " theme applied.");
 			};
 			card.Controls.Add(apply);
+			StyleCard(card);
 		}
 	}
 
 	private void BuildSteamNetworkPage()
 	{
 		steamNetworkPage = CreateUtilityPage("Steam Network", "Give the Steam Client Service real-time process priority.");
-		Panel card = CreateUtilityCard(steamNetworkPage, 28, 112, 700, 285);
+		Panel card = CreateUtilityCard(steamNetworkPage, 34, 120, 700, 300);
 
 		Label heading = new Label
 		{
@@ -470,6 +497,7 @@ public partial class MainForm
 			MessageBox.Show("Steam Client Service priority was restored to normal.", "Steam priority restored", MessageBoxButtons.OK, MessageBoxIcon.Information);
 		};
 		card.Controls.Add(restore);
+		StyleCard(card);
 	}
 
 	private Panel CreateUtilityCard(Panel parent, int x, int y, int width, int height)
@@ -491,14 +519,17 @@ public partial class MainForm
 		{
 			Text = text,
 			Location = new Point(x, y),
-			Size = new Size(width, 40),
+			Size = new Size(width, 42),
 			FlatStyle = FlatStyle.Flat,
 			BackColor = ACC,
 			ForeColor = Color.White,
 			Font = FB,
-			Cursor = Cursors.Hand
+			Cursor = Cursors.Hand,
+			Tag = "preserve-color"
 		};
 		button.FlatAppearance.BorderSize = 0;
+		RoundControl(button, 10);
+		AttachButtonMotion(button, button.BackColor, Blend(button.BackColor, Color.White, 0.15f));
 		return button;
 	}
 
@@ -506,7 +537,38 @@ public partial class MainForm
 	{
 		Button button = CreatePrimaryButton(text, x, y, width);
 		button.BackColor = Color.FromArgb(34, 40, 58);
+		AttachButtonMotion(button, button.BackColor, Blend(button.BackColor, Color.White, 0.13f));
 		return button;
+	}
+
+	private void AttachButtonMotion(Button button, Color restColor, Color hoverColor)
+	{
+		buttonRestColors[button] = restColor;
+		buttonHoverColors[button] = hoverColor;
+		buttonRestPositions[button] = button.Location;
+		if (animatedButtons.Contains(button))
+		{
+			return;
+		}
+		animatedButtons.Add(button);
+		button.MouseEnter += delegate
+		{
+			AnimateBackColor(button, buttonHoverColors[button], 140);
+		};
+		button.MouseLeave += delegate
+		{
+			AnimateBackColor(button, buttonRestColors[button], 190);
+			AnimatePosition(button, buttonRestPositions[button], 120);
+		};
+		button.MouseDown += delegate
+		{
+			Point restPosition = buttonRestPositions[button];
+			AnimatePosition(button, new Point(restPosition.X, restPosition.Y + 1), 70);
+		};
+		button.MouseUp += delegate
+		{
+			AnimatePosition(button, buttonRestPositions[button], 100);
+		};
 	}
 
 	private void ShowUtilityPage(Panel page)
@@ -538,8 +600,8 @@ public partial class MainForm
 		HideUtilityPages();
 		activeNav = null;
 		secondaryNav.Visible = false;
-		page.Location = new Point(sidebar.Width, 50);
-		page.Size = new Size(Math.Max(760, ClientSize.Width - sidebar.Width), Math.Max(580, ClientSize.Height - 78));
+		page.Location = new Point(sidebar.Width, 0);
+		page.Size = new Size(Math.Max(760, ClientSize.Width - sidebar.Width), Math.Max(580, ClientSize.Height - 28));
 		page.Visible = true;
 		page.BringToFront();
 		AnimatePage(page);
@@ -607,6 +669,29 @@ public partial class MainForm
 		SetThemePalette(preset);
 		currentThemeName = preset.Name;
 		RecolorTree(this, oldBackground, oldSidebar, oldAccent, oldAccentSecondary, oldActive, oldCard);
+		foreach (Button button in animatedButtons)
+		{
+			if (button.IsDisposed || string.Equals(button.Tag as string, "theme-preview", StringComparison.Ordinal))
+			{
+				continue;
+			}
+			Color restColor = buttonRestColors[button];
+			if (restColor == oldAccent)
+			{
+				restColor = ACC;
+			}
+			else if (restColor == oldAccentSecondary)
+			{
+				restColor = ACC2;
+			}
+			else if (restColor == oldActive)
+			{
+				restColor = ACTIVE_BG;
+			}
+			buttonRestColors[button] = restColor;
+			bool sidebarUtility = button.Parent != null && button.Parent.Parent == sidebar;
+			buttonHoverColors[button] = sidebarUtility ? Blend(restColor, ACC, 0.3f) : Blend(restColor, Color.White, 0.15f);
+		}
 		if (sidebar != null)
 		{
 			sidebar.BackColor = SIDEBAR;
