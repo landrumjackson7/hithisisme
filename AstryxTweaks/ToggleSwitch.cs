@@ -8,6 +8,12 @@ namespace AstryxTweaks;
 public class ToggleSwitch : CheckBox
 {
 	private float animationProgress;
+	private float animationStart;
+	private float animationTarget;
+	private DateTime animationStarted;
+	private System.Windows.Forms.Timer animationTimer;
+	private bool hovered;
+	private bool pressed;
 
 	public ToggleSwitch()
 	{
@@ -15,7 +21,8 @@ public class ToggleSwitch : CheckBox
 		((Control)this).Size = new Size(48, 26);
 		((Control)this).Text = "";
 		((Control)this).Cursor = Cursors.Hand;
-		SetStyle((ControlStyles)139282, true);
+		SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.ResizeRedraw | ControlStyles.SupportsTransparentBackColor, true);
+		((Control)this).BackColor = Color.Transparent;
 	}
 
 	protected override void OnCreateControl()
@@ -27,90 +34,159 @@ public class ToggleSwitch : CheckBox
 	protected override void OnCheckedChanged(EventArgs e)
 	{
 		base.OnCheckedChanged(e);
-		animationProgress = (((CheckBox)this).Checked ? 1f : 0f);
+		animationTarget = (((CheckBox)this).Checked ? 1f : 0f);
+		if (!IsHandleCreated)
+		{
+			animationProgress = animationTarget;
+			return;
+		}
+		animationStart = animationProgress;
+		animationStarted = DateTime.UtcNow;
+		if (animationTimer == null)
+		{
+			animationTimer = new System.Windows.Forms.Timer();
+			animationTimer.Interval = 15;
+			animationTimer.Tick += AnimateTick;
+		}
+		animationTimer.Stop();
+		animationTimer.Start();
+		((Control)this).Invalidate();
+	}
+
+	private void AnimateTick(object sender, EventArgs e)
+	{
+		float progress = (float)(DateTime.UtcNow - animationStarted).TotalMilliseconds / 170f;
+		if (progress >= 1f)
+		{
+			animationProgress = animationTarget;
+			animationTimer.Stop();
+		}
+		else
+		{
+			float eased = 1f - (float)Math.Pow(1f - Math.Max(0f, progress), 3.0);
+			animationProgress = animationStart + (animationTarget - animationStart) * eased;
+		}
+		((Control)this).Invalidate();
+	}
+
+	protected override void OnMouseEnter(EventArgs e)
+	{
+		hovered = true;
+		base.OnMouseEnter(e);
+		((Control)this).Invalidate();
+	}
+
+	protected override void OnMouseLeave(EventArgs e)
+	{
+		hovered = false;
+		pressed = false;
+		base.OnMouseLeave(e);
+		((Control)this).Invalidate();
+	}
+
+	protected override void OnMouseDown(MouseEventArgs e)
+	{
+		pressed = true;
+		base.OnMouseDown(e);
+		((Control)this).Invalidate();
+	}
+
+	protected override void OnMouseUp(MouseEventArgs e)
+	{
+		pressed = false;
+		base.OnMouseUp(e);
+		((Control)this).Invalidate();
+	}
+
+	protected override void OnEnabledChanged(EventArgs e)
+	{
+		base.OnEnabledChanged(e);
 		((Control)this).Invalidate();
 	}
 
 	protected override void OnPaint(PaintEventArgs e)
 	{
-		//IL_006e: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0075: Expected O, but got Unknown
-		//IL_009f: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00a6: Expected O, but got Unknown
-		//IL_00a9: Unknown result type (might be due to invalid IL or missing references)
-		//IL_00b5: Expected O, but got Unknown
-		//IL_011d: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0124: Expected O, but got Unknown
-		//IL_0129: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0130: Expected O, but got Unknown
-		//IL_0133: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0154: Expected O, but got Unknown
-		//IL_0157: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0172: Expected O, but got Unknown
-		//IL_018b: Unknown result type (might be due to invalid IL or missing references)
-		//IL_0192: Expected O, but got Unknown
-		//IL_0195: Unknown result type (might be due to invalid IL or missing references)
-		//IL_01b6: Expected O, but got Unknown
 		Graphics graphics = e.Graphics;
-		graphics.SmoothingMode = (SmoothingMode)4;
-		Rectangle rectangle = new Rectangle(1, 3, 45, 20);
-		Color color = Color.FromArgb(55, 67, 91);
-		Color to = Color.FromArgb(42, 119, 255);
-		Color color2 = Blend(color, to, animationProgress);
-		GraphicsPath val = Rounded(rectangle, 10);
+		graphics.SmoothingMode = SmoothingMode.AntiAlias;
+		graphics.Clear(((Control)this).Parent == null ? Color.FromArgb(13, 20, 38) : ((Control)this).Parent.BackColor);
+
+		Rectangle track = new Rectangle(2, 4, 44, 18);
+		Color offColor = Color.FromArgb(48, 58, 78);
+		Color onColor = Color.FromArgb(51, 126, 241);
+		Color trackColor = Blend(offColor, onColor, animationProgress);
+		if (hovered)
+		{
+			trackColor = Blend(trackColor, Color.White, 0.08f);
+		}
+		if (!Enabled)
+		{
+			trackColor = Blend(trackColor, Color.FromArgb(34, 39, 52), 0.55f);
+		}
+
+		GraphicsPath path = Rounded(track, 9);
 		try
 		{
-			LinearGradientBrush val2 = new LinearGradientBrush(rectangle, Blend(color2, Color.White, ((CheckBox)this).Checked ? 0.14f : 0f), color2, (LinearGradientMode)2);
+			SolidBrush trackBrush = new SolidBrush(trackColor);
 			try
 			{
-				Pen val3 = new Pen(Blend(Color.FromArgb(73, 86, 115), Color.FromArgb(130, 181, 255), animationProgress));
-				try
-				{
-					graphics.FillPath((Brush)val2, val);
-					graphics.DrawPath(val3, val);
-				}
-				finally
-				{
-					((IDisposable)val3)?.Dispose();
-				}
+				graphics.FillPath(trackBrush, path);
 			}
 			finally
 			{
-				((IDisposable)val2)?.Dispose();
+				trackBrush.Dispose();
 			}
 		}
 		finally
 		{
-			((IDisposable)val)?.Dispose();
+			path.Dispose();
 		}
-		float num = 4f + 21f * animationProgress;
-		SolidBrush val4 = new SolidBrush(Color.FromArgb((int)(120f * animationProgress), 120, 190, 255));
+
+		float thumbX = 4f + 22f * animationProgress;
+		float thumbY = pressed ? 6f : 5f;
+		SolidBrush shadowBrush = new SolidBrush(Color.FromArgb(42, 0, 0, 0));
 		try
 		{
-			SolidBrush val5 = new SolidBrush(Color.White);
-			try
-			{
-				graphics.FillEllipse((Brush)val4, num - 3f, 2f, 24f, 24f);
-				graphics.FillEllipse((Brush)val5, num, 5f, 18f, 18f);
-				SolidBrush val6 = new SolidBrush(Color.FromArgb(150, 255, 255, 255));
-				try
-				{
-					graphics.FillEllipse((Brush)val6, num + 3.5f, 6.5f, 10f, 6f);
-				}
-				finally
-				{
-					((IDisposable)val6)?.Dispose();
-				}
-			}
-			finally
-			{
-				((IDisposable)val5)?.Dispose();
-			}
+			graphics.FillEllipse(shadowBrush, thumbX + 1f, thumbY + 2f, 16f, 16f);
 		}
 		finally
 		{
-			((IDisposable)val4)?.Dispose();
+			shadowBrush.Dispose();
 		}
+		SolidBrush thumbBrush = new SolidBrush(Enabled ? Color.FromArgb(248, 250, 255) : Color.FromArgb(166, 171, 184));
+		try
+		{
+			graphics.FillEllipse(thumbBrush, thumbX, thumbY, 16f, 16f);
+		}
+		finally
+		{
+			thumbBrush.Dispose();
+		}
+
+		if (Focused && ShowFocusCues)
+		{
+			Pen focusPen = new Pen(Color.FromArgb(165, 148, 190, 255), 1f);
+			GraphicsPath focusPath = Rounded(new Rectangle(1, 3, 46, 20), 10);
+			try
+			{
+				graphics.DrawPath(focusPen, focusPath);
+			}
+			finally
+			{
+				focusPen.Dispose();
+				focusPath.Dispose();
+			}
+		}
+	}
+
+	protected override void Dispose(bool disposing)
+	{
+		if (disposing && animationTimer != null)
+		{
+			animationTimer.Stop();
+			animationTimer.Dispose();
+			animationTimer = null;
+		}
+		base.Dispose(disposing);
 	}
 
 	private static Color Blend(Color from, Color to, float amount)
