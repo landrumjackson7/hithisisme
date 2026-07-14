@@ -1921,8 +1921,15 @@ public partial class MainForm : Form
 		foreach (Panel value in navMap.Values)
 		{
 			((Control)value).Visible = false;
+			((Control)value).Enabled = false;
+			((Control)value).SendToBack();
 		}
 		Panel val3 = navMap[nav];
+		foreach (CheckBox toggle in allCB)
+		{
+			((Control)toggle).Visible = tweakPages[toggle] == val3;
+		}
+		((Control)val3).Enabled = true;
 		((Control)val3).Visible = true;
 		((Control)val3).BringToFront();
 		RelayoutRows(val3);
