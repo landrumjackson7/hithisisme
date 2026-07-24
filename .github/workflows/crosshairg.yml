@@ -1,0 +1,49 @@
+name: Build Crosshair G
+
+on:
+  push:
+    branches: ["**"]
+    paths:
+      - "CrosshairG/**"
+      - ".github/workflows/crosshairg.yml"
+  pull_request:
+    paths:
+      - "CrosshairG/**"
+      - ".github/workflows/crosshairg.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: CrosshairG
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore
+        run: dotnet restore CrosshairG.csproj
+
+      - name: Build
+        run: dotnet build CrosshairG.csproj -c Release --no-restore
+
+      - name: Publish single-file exe
+        run: >
+          dotnet publish CrosshairG.csproj -c Release -r win-x64
+          --self-contained true
+          /p:PublishSingleFile=true
+          /p:IncludeNativeLibrariesForSelfExtract=true
+          /p:EnableCompressionInSingleFile=true
+          -o publish
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: CrosshairG-win-x64
+          path: CrosshairG/publish/CrosshairG.exe
+          if-no-files-found: error
