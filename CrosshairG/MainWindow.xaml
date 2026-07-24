@@ -1,0 +1,296 @@
+<Window x:Class="CrosshairG.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        xmlns:local="clr-namespace:CrosshairG"
+        Title="Crosshair G"
+        Width="980" Height="720"
+        MinWidth="820" MinHeight="560"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgDark}"
+        TextElement.Foreground="{StaticResource TextPrimary}"
+        FontFamily="{StaticResource AppFont}" FontSize="13">
+
+    <Window.Resources>
+        <ObjectDataProvider x:Key="StyleValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:CrosshairStyle" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="LineStyleValues" MethodName="GetValues" ObjectType="{x:Type sys:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type TypeName="local:LineStyle" />
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Window.Resources>
+
+    <Border BorderBrush="{StaticResource BorderBrushX}" BorderThickness="1">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="48" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Top bar -->
+            <Border Grid.Row="0" Background="{StaticResource BgPanel}" MouseLeftButtonDown="TopBar_MouseDown">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Logo -->
+                    <TextBlock Grid.Column="0" VerticalAlignment="Center" Margin="18,0,0,0" FontSize="16" FontWeight="Bold">
+                        <Run Text="CROSSHAIR" Foreground="{StaticResource TextPrimary}" />
+                        <Run Text="G" Foreground="{StaticResource Accent}" />
+                    </TextBlock>
+
+                    <!-- Nav tabs -->
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <RadioButton x:Name="TabBrowse" Style="{StaticResource NavTab}" GroupName="nav"
+                                     Content="BROWSE" IsChecked="True" Checked="Nav_Checked" Tag="Browse" />
+                        <RadioButton x:Name="TabDesign" Style="{StaticResource NavTab}" GroupName="nav"
+                                     Content="DESIGN" Checked="Nav_Checked" Tag="Design" />
+                        <RadioButton x:Name="TabSaved" Style="{StaticResource NavTab}" GroupName="nav"
+                                     Content="SAVED" Checked="Nav_Checked" Tag="Saved" />
+                        <RadioButton x:Name="TabSettings" Style="{StaticResource NavTab}" GroupName="nav"
+                                     Content="SETTINGS" Checked="Nav_Checked" Tag="Settings" />
+                    </StackPanel>
+
+                    <!-- Right controls -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0">
+                        <ToggleButton x:Name="OnOff" Style="{StaticResource OnOffToggle}"
+                                      IsChecked="{Binding OverlayEnabled}" Margin="0,0,10,0" />
+                        <Button Style="{StaticResource CaptionButton}" Content="&#xE921;" Click="Minimize_Click" ToolTip="Minimize" />
+                        <Button Style="{StaticResource CaptionButton}" Content="&#xE8BB;" Click="CloseToTray_Click" ToolTip="Close to tray (keeps running)" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Content -->
+            <Grid Grid.Row="1">
+
+                <!-- BROWSE -->
+                <Grid x:Name="ViewBrowse">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="210" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Sidebar -->
+                    <Border Grid.Column="0" Background="{StaticResource BgPanel}">
+                        <StackPanel Margin="12,14">
+                            <TextBlock Text="STYLE" Foreground="{StaticResource TextDim}" FontSize="11" FontWeight="Bold" Margin="4,0,0,8" />
+                            <StackPanel x:Name="CategoryList" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Gallery -->
+                    <Grid Grid.Column="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <Border Grid.Row="0" Background="{StaticResource BgPanel2}" CornerRadius="8" Margin="18,16,18,4">
+                            <Grid>
+                                <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" Foreground="{StaticResource TextDim}"
+                                           VerticalAlignment="Center" Margin="12,0,0,0" FontSize="14" />
+                                <TextBox x:Name="SearchBox" Background="Transparent" BorderThickness="0"
+                                         Foreground="{StaticResource TextPrimary}" CaretBrush="{StaticResource TextPrimary}"
+                                         VerticalContentAlignment="Center" Padding="34,10,10,10"
+                                         TextChanged="Search_TextChanged" />
+                                <TextBlock IsHitTestVisible="False" Text="Search crosshairs..." Foreground="{StaticResource TextDim}"
+                                           VerticalAlignment="Center" Margin="36,0,0,0" x:Name="SearchPlaceholder" />
+                            </Grid>
+                        </Border>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,8,10,8">
+                            <StackPanel x:Name="GalleryPanel" />
+                        </ScrollViewer>
+
+                        <!-- Preview / use bar -->
+                        <Border Grid.Row="2" Background="{StaticResource BgPanel}" BorderBrush="{StaticResource BorderBrushX}" BorderThickness="0,1,0,0">
+                            <Grid Margin="18,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="56" Height="56" Background="#0E0F12" CornerRadius="6">
+                                    <Canvas x:Name="BrowsePreview" ClipToBounds="True" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="14,0,0,0">
+                                    <TextBlock x:Name="BrowseSelName" Text="Click a crosshair to preview it" Foreground="{StaticResource TextDim}" />
+                                </StackPanel>
+                                <Button Grid.Column="2" x:Name="UseBtn" Style="{StaticResource PrimaryButton}"
+                                        Content="USE THIS CROSSHAIR" IsEnabled="False" Click="UseCrosshair_Click" />
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Grid>
+
+                <!-- DESIGN -->
+                <Grid x:Name="ViewDesign" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.15*" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="1*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Margin="18,14,4,14">
+                        <StackPanel>
+                            <TextBlock Text="Design your crosshair" Style="{StaticResource SectionHeader}" Margin="0,0,0,4" />
+
+                            <TextBlock Text="Shape" Style="{StaticResource FieldLabel}" />
+                            <ComboBox ItemsSource="{Binding Source={StaticResource StyleValues}}" SelectedItem="{Binding Style}" />
+
+                            <TextBlock Text="Line style" Style="{StaticResource FieldLabel}" />
+                            <ComboBox ItemsSource="{Binding Source={StaticResource LineStyleValues}}" SelectedItem="{Binding LineStyle}" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <Button Style="{StaticResource GhostButton}" Content="Thin" Click="Thin_Click" Margin="0,0,8,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Thick" Click="Thick_Click" Margin="0,0,8,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Smaller" Click="Smaller_Click" Margin="0,0,8,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Bigger" Click="Bigger_Click" />
+                            </StackPanel>
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Size (arm length): " /><Run Text="{Binding Size, StringFormat=0}" />
+                            </TextBlock>
+                            <Slider Minimum="0" Maximum="60" Value="{Binding Size}" />
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Thickness: " /><Run Text="{Binding Thickness, StringFormat=0.0}" />
+                            </TextBlock>
+                            <Slider Minimum="0.5" Maximum="12" Value="{Binding Thickness}" />
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Center gap: " /><Run Text="{Binding Gap, StringFormat=0}" />
+                            </TextBlock>
+                            <Slider Minimum="0" Maximum="40" Value="{Binding Gap}" />
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Dot size: " /><Run Text="{Binding DotSize, StringFormat=0.0}" />
+                            </TextBlock>
+                            <Slider Minimum="0.5" Maximum="20" Value="{Binding DotSize}" />
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Circle radius: " /><Run Text="{Binding CircleRadius, StringFormat=0}" />
+                            </TextBlock>
+                            <Slider Minimum="2" Maximum="80" Value="{Binding CircleRadius}" />
+
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Opacity: " /><Run Text="{Binding Opacity, StringFormat=0.00}" />
+                            </TextBlock>
+                            <Slider Minimum="0.05" Maximum="1" Value="{Binding Opacity}" />
+
+                            <TextBlock Text="Wavy lines" Style="{StaticResource SectionHeader}" />
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Wave amplitude: " /><Run Text="{Binding WaveAmplitude, StringFormat=0.0}" />
+                            </TextBlock>
+                            <Slider Minimum="0" Maximum="12" Value="{Binding WaveAmplitude}" />
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Wave frequency: " /><Run Text="{Binding WaveFrequency, StringFormat=0.0}" />
+                            </TextBlock>
+                            <Slider Minimum="0.5" Maximum="8" Value="{Binding WaveFrequency}" />
+
+                            <TextBlock Text="Color" Style="{StaticResource SectionHeader}" />
+                            <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                                <Button Style="{StaticResource GhostButton}" Content="Green"   Click="Preset_Click" Tag="0,220,0" Margin="0,0,6,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Red"     Click="Preset_Click" Tag="230,20,20" Margin="0,0,6,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Cyan"    Click="Preset_Click" Tag="0,220,220" Margin="0,0,6,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Magenta" Click="Preset_Click" Tag="230,0,230" Margin="0,0,6,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Yellow"  Click="Preset_Click" Tag="240,220,0" Margin="0,0,6,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="White"   Click="Preset_Click" Tag="255,255,255" />
+                            </StackPanel>
+                            <TextBlock Style="{StaticResource FieldLabel}"><Run Text="Red" /></TextBlock>
+                            <Slider Minimum="0" Maximum="255" Value="{Binding R}" />
+                            <TextBlock Style="{StaticResource FieldLabel}"><Run Text="Green" /></TextBlock>
+                            <Slider Minimum="0" Maximum="255" Value="{Binding G}" />
+                            <TextBlock Style="{StaticResource FieldLabel}"><Run Text="Blue" /></TextBlock>
+                            <Slider Minimum="0" Maximum="255" Value="{Binding B}" />
+                            <TextBlock Style="{StaticResource FieldLabel}"><Run Text="Alpha" /></TextBlock>
+                            <Slider Minimum="0" Maximum="255" Value="{Binding A}" />
+
+                            <TextBlock Text="Outline" Style="{StaticResource SectionHeader}" />
+                            <CheckBox Content="Enable outline" IsChecked="{Binding OutlineEnabled}" Foreground="{StaticResource TextPrimary}" />
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Outline thickness: " /><Run Text="{Binding OutlineThickness, StringFormat=0.0}" />
+                            </TextBlock>
+                            <Slider Minimum="0" Maximum="6" Value="{Binding OutlineThickness}" />
+
+                            <StackPanel Orientation="Horizontal" Margin="0,16,0,0">
+                                <Button Style="{StaticResource PrimaryButton}" Content="SAVE CROSSHAIR" Click="SaveCurrent_Click" Margin="0,0,8,0" />
+                                <Button Style="{StaticResource GhostButton}" Content="Reset" Click="Reset_Click" />
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+
+                    <Border Grid.Column="2" Background="#0E0F12" CornerRadius="8" Margin="0,14,18,14"
+                            BorderBrush="{StaticResource BorderBrushX}" BorderThickness="1">
+                        <Grid>
+                            <Canvas x:Name="DesignPreview" ClipToBounds="True" SizeChanged="DesignPreview_SizeChanged" />
+                            <TextBlock Text="Live preview" Foreground="#4A4D53" Margin="10" VerticalAlignment="Top" />
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- SAVED -->
+                <Grid x:Name="ViewSaved" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="18,16,18,4">
+                        <TextBlock Text="Saved crosshairs" Style="{StaticResource SectionHeader}" Margin="0" VerticalAlignment="Center" />
+                        <Button Style="{StaticResource PrimaryButton}" Content="SAVE CURRENT" Click="SaveCurrent_Click" Margin="16,0,0,0" />
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="18,8">
+                        <StackPanel>
+                            <WrapPanel x:Name="SavedPanel" />
+                            <TextBlock x:Name="SavedEmpty" Text="No saved crosshairs yet. Design one and hit Save."
+                                       Foreground="{StaticResource TextDim}" Margin="4,8" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+
+                <!-- SETTINGS -->
+                <Grid x:Name="ViewSettings" Visibility="Collapsed">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="18,14">
+                        <StackPanel MaxWidth="520" HorizontalAlignment="Left">
+                            <TextBlock Text="Settings" Style="{StaticResource SectionHeader}" Margin="0,0,0,6" />
+                            <CheckBox Content="Overlay enabled (show crosshair)" IsChecked="{Binding OverlayEnabled}"
+                                      Foreground="{StaticResource TextPrimary}" Margin="0,6" />
+
+                            <TextBlock Text="Position offset" Style="{StaticResource SectionHeader}" />
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Offset X: " /><Run Text="{Binding OffsetX, StringFormat=0}" />
+                            </TextBlock>
+                            <Slider Minimum="-400" Maximum="400" Value="{Binding OffsetX}" />
+                            <TextBlock Style="{StaticResource FieldLabel}">
+                                <Run Text="Offset Y: " /><Run Text="{Binding OffsetY, StringFormat=0}" />
+                            </TextBlock>
+                            <Slider Minimum="-400" Maximum="400" Value="{Binding OffsetY}" />
+
+                            <TextBlock Text="About" Style="{StaticResource SectionHeader}" />
+                            <TextBlock TextWrapping="Wrap" Foreground="{StaticResource TextDim}">
+                                Crosshair G runs in the system tray. Closing this window keeps it
+                                running with the crosshair active — use the tray icon's Exit (or end
+                                the task) to quit. Settings are saved automatically to
+                                %APPDATA%\CrosshairG.
+                            </TextBlock>
+                            <TextBlock Text="Tip: use borderless / windowed full-screen in games so the overlay shows."
+                                       TextWrapping="Wrap" Foreground="{StaticResource TextDim}" Margin="0,8,0,0" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

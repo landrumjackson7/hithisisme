@@ -14,6 +14,13 @@ public enum CrosshairStyle
     CrossDot,
     Circle,
     TShape,
+    Arrow,
+}
+
+public enum LineStyle
+{
+    Solid,
+    Wavy,
 }
 
 /// <summary>
@@ -37,8 +44,20 @@ public sealed class CrosshairSettings : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(OutlineColor)));
     }
 
+    private string _name = "Custom";
+    public string Name { get => _name; set => Set(ref _name, value); }
+
     private CrosshairStyle _style = CrosshairStyle.CrossDot;
     public CrosshairStyle Style { get => _style; set => Set(ref _style, value); }
+
+    private LineStyle _lineStyle = LineStyle.Solid;
+    public LineStyle LineStyle { get => _lineStyle; set => Set(ref _lineStyle, value); }
+
+    private double _waveAmplitude = 3;   // wavy: peak displacement
+    public double WaveAmplitude { get => _waveAmplitude; set => Set(ref _waveAmplitude, value); }
+
+    private double _waveFrequency = 3;    // wavy: number of humps along an arm
+    public double WaveFrequency { get => _waveFrequency; set => Set(ref _waveFrequency, value); }
 
     private double _size = 12;      // length of each arm (from the gap outward)
     public double Size { get => _size; set => Set(ref _size, value); }
@@ -140,9 +159,21 @@ public sealed class CrosshairSettings : INotifyPropertyChanged
         }
     }
 
+    public CrosshairSettings Clone()
+    {
+        var c = new CrosshairSettings();
+        c.CopyFrom(this);
+        c.Name = Name;
+        return c;
+    }
+
     public void CopyFrom(CrosshairSettings other)
     {
+        Name = other.Name;
         Style = other.Style;
+        LineStyle = other.LineStyle;
+        WaveAmplitude = other.WaveAmplitude;
+        WaveFrequency = other.WaveFrequency;
         Size = other.Size;
         Thickness = other.Thickness;
         Gap = other.Gap;

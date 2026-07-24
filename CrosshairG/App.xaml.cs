@@ -16,10 +16,14 @@ public partial class App : Application
 {
     private const string MutexName = "CrosshairG_SingleInstance_Mutex";
 
+    /// <summary>True only while the app is genuinely quitting, so the main
+    /// window's close button hides to tray instead of exiting.</summary>
+    public static bool IsExiting { get; private set; }
+
     private Mutex? _instanceMutex;
     private CrosshairSettings _settings = new();
     private OverlayWindow? _overlay;
-    private SettingsWindow? _settingsWindow;
+    private MainWindow? _mainWindow;
     private Forms.NotifyIcon? _tray;
     private Forms.ToolStripMenuItem? _toggleItem;
 
@@ -39,6 +43,7 @@ public partial class App : Application
         _overlay.ApplyVisibility(); // shows the overlay if enabled
 
         BuildTrayIcon();
+        OpenMainWindow(); // open the menu on launch, like Crosshair X / Zero
 
         _settings.PropertyChanged += (_, args) =>
         {
@@ -51,9 +56,9 @@ public partial class App : Application
     {
         var menu = new Forms.ContextMenuStrip();
 
-        var settingsItem = new Forms.ToolStripMenuItem("Settings…");
+        var settingsItem = new Forms.ToolStripMenuItem("Open Crosshair G…");
         settingsItem.Font = new Drawing.Font(settingsItem.Font, Drawing.FontStyle.Bold);
-        settingsItem.Click += (_, _) => OpenSettings();
+        settingsItem.Click += (_, _) => OpenMainWindow();
 
         _toggleItem = new Forms.ToolStripMenuItem("Show crosshair")
         {
@@ -81,31 +86,21 @@ public partial class App : Application
             Text = "Crosshair G",
             ContextMenuStrip = menu,
         };
-        _tray.DoubleClick += (_, _) => OpenSettings();
+        _tray.DoubleClick += (_, _) => OpenMainWindow();
     }
 
-    private void OpenSettings()
+    private void OpenMainWindow()
     {
-        if (_settingsWindow != null)
-        {
-            if (_settingsWindow.WindowState == WindowState.Minimized)
-                _settingsWindow.WindowState = WindowState.Normal;
-            _settingsWindow.Activate();
-            return;
-        }
-
-        _settingsWindow = new SettingsWindow(_settings);
-        _settingsWindow.Closed += (_, _) =>
-        {
-            _settingsWindow = null;
-            _settings.Save();
-        };
-        _settingsWindow.Show();
-        _settingsWindow.Activate();
+        _mainWindow ??= new MainWindow(_settings);
+        if (!_mainWindow.IsVisible) _mainWindow.Show();
+        if (_mainWindow.WindowState == WindowState.Minimized)
+            _mainWindow.WindowState = WindowState.Normal;
+        _mainWindow.Activate();
     }
 
     private void ExitApp()
     {
+        IsExiting = true;
         _settings.Save();
         Shutdown();
     }
