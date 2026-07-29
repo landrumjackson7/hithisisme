@@ -12,6 +12,7 @@ namespace ExitClone.UI.Pages
         private readonly ListView _routes = new ListView();
         private readonly CheckedListBox _relays = new CheckedListBox();
         private readonly Label _summary = new Label();
+        private bool _loadingRelays;
 
         public event EventHandler OptimizeRequested;
 
@@ -77,7 +78,10 @@ namespace ExitClone.UI.Pages
             _relays.ForeColor = Theme.Text;
             _relays.BorderStyle = BorderStyle.None;
             _relays.CheckOnClick = true;
-            _relays.ItemCheck += (s, e) => BeginInvoke((Action)SaveRelayPreference);
+            _relays.ItemCheck += (s, e) =>
+            {
+                if (!_loadingRelays) Safe(SaveRelayPreference);
+            };
             relayPanel.Controls.Add(_relays);
             relayPanel.Controls.Add(caption);
 
@@ -88,12 +92,20 @@ namespace ExitClone.UI.Pages
 
         private void LoadRelays()
         {
-            _relays.Items.Clear();
-            foreach (var relay in _state.Relays)
+            _loadingRelays = true;
+            try
             {
-                bool enabled = _state.Settings.PreferredRelayIds.Count == 0 ||
-                               _state.Settings.PreferredRelayIds.Contains(relay.Id);
-                _relays.Items.Add(relay, enabled);
+                _relays.Items.Clear();
+                foreach (var relay in _state.Relays)
+                {
+                    bool enabled = _state.Settings.PreferredRelayIds.Count == 0 ||
+                                   _state.Settings.PreferredRelayIds.Contains(relay.Id);
+                    _relays.Items.Add(relay, enabled);
+                }
+            }
+            finally
+            {
+                _loadingRelays = false;
             }
         }
 
@@ -146,10 +158,6 @@ namespace ExitClone.UI.Pages
             base.Refresh();
         }
 
-        private void Safe(Action action)
-        {
-            if (!IsHandleCreated || IsDisposed) return;
-            try { BeginInvoke(action); } catch (Exception) { }
-        }
+        private void Safe(Action action) => UiDispatch.Post(this, action);
     }
 }

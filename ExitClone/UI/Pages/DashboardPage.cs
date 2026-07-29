@@ -141,8 +141,8 @@ namespace ExitClone.UI.Pages
             _optimize.Click += async (s, e) => await OptimizeAsync();
             _connect.Click += async (s, e) => await ToggleConnectionAsync();
 
-            _state.SelectionChanged += (s, e) => BeginInvoke((Action)SyncSelection);
-            _state.GamesChanged += (s, e) => BeginInvoke((Action)ReloadGames);
+            _state.SelectionChanged += (s, e) => Safe(SyncSelection);
+            _state.GamesChanged += (s, e) => Safe(ReloadGames);
 
             var controller = _state.Controller;
             controller.StateChanged += (s, e) => Safe(() => UpdateState(e.State, e.Detail));
@@ -153,11 +153,7 @@ namespace ExitClone.UI.Pages
                     e.Completed, e.Total, e.Route.Label, e.Route.Stats.Average, e.Route.Stats.Jitter, e.Route.Stats.LossPercent)));
         }
 
-        private void Safe(Action action)
-        {
-            if (!IsHandleCreated || IsDisposed) return;
-            try { BeginInvoke(action); } catch (Exception) { }
-        }
+        private void Safe(Action action) => UiDispatch.Post(this, action);
 
         private void ReloadGames()
         {

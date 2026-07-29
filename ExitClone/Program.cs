@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using ExitClone.Core;
@@ -12,6 +13,7 @@ namespace ExitClone
         [STAThread]
         private static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.AssemblyResolve += ResolveEmbedded;
             using (var single = new Mutex(true, "ExitClone.SingleInstance", out bool isFirst))
             {
                 if (!isFirst)
@@ -40,6 +42,18 @@ namespace ExitClone
                 Application.Run(new MainForm(minimized));
 
                 GC.KeepAlive(single);
+            }
+        }
+
+        private static Assembly ResolveEmbedded(object sender, ResolveEventArgs args)
+        {
+            var name = new AssemblyName(args.Name).Name + ".dll";
+            using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
+            {
+                if (stream == null) return null;
+                var raw = new byte[stream.Length];
+                stream.Read(raw, 0, raw.Length);
+                return Assembly.Load(raw);
             }
         }
     }

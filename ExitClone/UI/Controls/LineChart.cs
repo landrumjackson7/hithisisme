@@ -37,7 +37,7 @@ namespace ExitClone.UI.Controls
                 Trim(_primary);
                 Trim(_secondary);
             }
-            if (IsHandleCreated) BeginInvoke((Action)Invalidate);
+            UiDispatch.Post(this, Invalidate);
         }
 
         public void Clear()

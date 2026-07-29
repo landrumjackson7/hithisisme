@@ -249,11 +249,11 @@ namespace ExitClone.UI
         private async void OnGameStarted(object sender, GameEventArgs e)
         {
             if (!_state.Settings.DetectGames) return;
-            BeginInvoke((Action)(() =>
+            UiDispatch.Post(this, () =>
             {
                 _tray.ShowBalloonTip(4000, "ExitClone", e.Game.Name + " detected", ToolTipIcon.Info);
                 _state.Select(e.Game);
-            }));
+            });
 
             if (!_state.Settings.AutoConnectOnGameLaunch) return;
 

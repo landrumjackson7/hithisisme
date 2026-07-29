@@ -21,4 +21,12 @@
     <Reference Include="System.Management" />
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
+  <!-- Referenced assemblies are embedded so the build output is a single standalone .exe. -->
+  <Target Name="EmbedReferencedAssemblies" AfterTargets="ResolveReferences">
+    <ItemGroup>
+      <EmbeddedResource Include="@(ReferenceCopyLocalPaths)" Condition="'%(Extension)' == '.dll'">
+        <LogicalName>%(Filename)%(Extension)</LogicalName>
+      </EmbeddedResource>
+    </ItemGroup>
+  </Target>
 </Project>

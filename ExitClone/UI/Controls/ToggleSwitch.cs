@@ -14,7 +14,8 @@ namespace ExitClone.UI.Controls
         public ToggleSwitch()
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.UserPaint | ControlStyles.ResizeRedraw, true);
+                     ControlStyles.UserPaint | ControlStyles.ResizeRedraw |
+                     ControlStyles.SupportsTransparentBackColor, true);
             Size = new Size(46, 24);
             Cursor = Cursors.Hand;
             BackColor = Color.Transparent;

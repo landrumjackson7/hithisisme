@@ -23,7 +23,7 @@ namespace ExitClone.UI.Pages
             Padding = new Padding(18);
             Build();
             Reload();
-            _state.GamesChanged += (s, e) => BeginInvoke((Action)Reload);
+            _state.GamesChanged += (s, e) => UiDispatch.Post(this, Reload);
         }
 
         private void Build()
