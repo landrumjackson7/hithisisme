@@ -40,7 +40,11 @@ namespace ExitClone.Core
 
         public string LastGameId { get; set; }
         public string LastServerName { get; set; }
-        public List<string> PreferredRelayIds { get; set; } = new List<string>();
+        /// <summary>North American pool, central-first: this build targets NA Central by default.</summary>
+        public List<string> PreferredRelayIds { get; set; } = new List<string>
+        {
+            "us-central", "us-central2", "us-east", "us-east2", "us-west", "us-west2", "ca-central"
+        };
         public Dictionary<string, GameProfile> Profiles { get; set; } = new Dictionary<string, GameProfile>();
 
         public GameProfile ProfileFor(string gameId)

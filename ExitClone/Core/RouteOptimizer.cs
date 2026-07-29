@@ -36,11 +36,12 @@ namespace ExitClone.Core
 
             if (maxHops >= 2)
             {
-                // Chain a relay with the closest relay in a different region: this is the
-                // "alternative path" behaviour that makes long haul routes stable.
+                // Chain each relay with a few other exits: this is the "alternative path"
+                // behaviour that makes long haul routes stable, and it also covers same-region
+                // pools (e.g. NA only) where an in-region hop can still beat the ISP path.
                 foreach (var entry in relays)
                 {
-                    foreach (var exit in relays.Where(r => r.Region != entry.Region).Take(3))
+                    foreach (var exit in relays.Where(r => r.Id != entry.Id).Take(3))
                         routes.Add(new Route { Destination = destination, Hops = { entry, exit } });
                 }
             }

@@ -13,6 +13,14 @@ dotnet build .\ExitClone\ExitClone.csproj -c Release
 The executable is written to `ExitClone\bin\Release\net48\ExitClone.exe`. It is a single .exe and
 needs .NET Framework 4.8, which ships with Windows 10/11.
 
+## Defaults: NA Central
+
+This build is tuned for a North America Central player: every built-in title selects its NA Central
+region first (Chicago/Dallas endpoints where the publisher exposes one), and the relay pool starts
+with only the North American relays enabled — US Central (Dallas), US Central 2 (Chicago), US East,
+US East 2, US West, US West 2, Canada Central. Other regions are still listed and can be re-enabled
+from the Routes page.
+
 ## Features
 
 - **Game library** – 20 built-in titles with their regional server endpoints, favourites, search,
