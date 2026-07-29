@@ -18,9 +18,11 @@ namespace ExitClone.Core
         private static readonly Relay[] BuiltIn =
         {
             R("us-east", "US East", "Ashburn", "United States", "North America", "ec2.us-east-1.amazonaws.com"),
-            R("us-east2", "US East 2", "New York", "United States", "North America", "ec2.us-east-2.amazonaws.com"),
-            R("us-central", "US Central", "Dallas", "United States", "North America", "ec2.us-west-1.amazonaws.com"),
-            R("us-west", "US West", "Portland", "United States", "North America", "ec2.us-west-2.amazonaws.com"),
+            R("us-east2", "US East 2", "Columbus", "United States", "North America", "ec2.us-east-2.amazonaws.com"),
+            R("us-central", "US Central", "Dallas", "United States", "North America", "speedtest.dallas.linode.com"),
+            R("us-central2", "US Central 2", "Chicago", "United States", "North America", "speedtest.chicago.linode.com"),
+            R("us-west", "US West", "San Jose", "United States", "North America", "ec2.us-west-1.amazonaws.com"),
+            R("us-west2", "US West 2", "Portland", "United States", "North America", "ec2.us-west-2.amazonaws.com"),
             R("ca-central", "Canada Central", "Montreal", "Canada", "North America", "ec2.ca-central-1.amazonaws.com"),
             R("sa-east", "South America", "Sao Paulo", "Brazil", "South America", "ec2.sa-east-1.amazonaws.com"),
             R("eu-west", "EU West", "Dublin", "Ireland", "Europe", "ec2.eu-west-1.amazonaws.com"),
