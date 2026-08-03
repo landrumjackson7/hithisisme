@@ -36,8 +36,9 @@ namespace TweaksForAll
             Text = Brand;
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterScreen;
-            Size = new Size(1120, 700);
-            MinimumSize = new Size(980, 620);
+            var wa = Screen.FromPoint(Cursor.Position).WorkingArea;
+            Size = new Size(Math.Min(1120, wa.Width), Math.Min(700, wa.Height));
+            MinimumSize = new Size(Math.Min(980, wa.Width), Math.Min(620, wa.Height));
             BackColor = Theme.Bg;
             DoubleBuffered = true;
             try { Icon = System.Drawing.Icon.ExtractAssociatedIcon(Application.ExecutablePath); } catch { }
