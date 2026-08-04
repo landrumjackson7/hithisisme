@@ -23,6 +23,7 @@ namespace AstryxAutoClicker
         private Thread worker;
         private volatile bool running;
         private volatile int targetCps = 10;
+        private volatile int startDelayMs = 300;
         private volatile MouseButtonKind button = MouseButtonKind.Left;
 
         public bool IsRunning
@@ -40,6 +41,16 @@ namespace AstryxAutoClicker
         {
             get { return button; }
             set { button = value; }
+        }
+
+        /// <summary>
+        /// Grace period after <see cref="Start"/> before the first click fires, so the
+        /// user can move the cursor off the Start button (which the click would otherwise hit).
+        /// </summary>
+        public int StartDelayMs
+        {
+            get { return startDelayMs; }
+            set { startDelayMs = Clamp(value, 0, 5000); }
         }
 
         public void Start()
@@ -94,6 +105,14 @@ namespace AstryxAutoClicker
 
         private void Loop()
         {
+            int delay = startDelayMs;
+            while (running && delay > 0)
+            {
+                int slice = Math.Min(25, delay);
+                Thread.Sleep(slice);
+                delay -= slice;
+            }
+
             long ticksPerSecond = Stopwatch.Frequency;
             var stopwatch = Stopwatch.StartNew();
             long next = stopwatch.ElapsedTicks;

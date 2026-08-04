@@ -11,6 +11,7 @@ selectable mouse button, and a global start/stop hotkey.
 - High-resolution `Stopwatch`-paced click thread so high rates stay accurate (a WinForms
   timer tops out around 64 Hz, which is why a dedicated thread is used instead).
 - Clicks at the current cursor position, so aim first, then start.
+- Short (300 ms) grace delay after Start so the first click doesn't land on the Start button.
 
 ## Build
 

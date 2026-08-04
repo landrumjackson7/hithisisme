@@ -206,8 +206,8 @@ namespace AstryxAutoClicker
                 toggleButton.Text = "Stop (" + key + ")";
                 toggleButton.BackColor = Color.FromArgb(214, 69, 69);
                 statusLabel.ForeColor = Warn;
-                statusLabel.Text = "Clicking at " + engine.TargetCps + " CPS (" + buttonBox.SelectedItem +
-                    "). Press " + key + " to stop.";
+                statusLabel.Text = "Starting in " + engine.StartDelayMs + " ms, then clicking at " + engine.TargetCps +
+                    " CPS (" + buttonBox.SelectedItem + "). Press " + key + " to stop.";
             }
             else
             {
