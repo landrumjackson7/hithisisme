@@ -1,0 +1,5 @@
+AstryxAutoClicker.exe
+*.exe
+test-report.md
+bin/
+obj/
